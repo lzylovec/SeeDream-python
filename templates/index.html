@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>镇瑜的 AI图片修改器</title>
+    <style>
+        :root {
+            --primary-color: #6366f1;
+            --primary-hover: #4f46e5;
+            --secondary-color: #f3f4f6;
+            --text-color: #374151;
+            --text-light: #6b7280;
+            --background: #ffffff;
+            --surface: #f9fafb;
+            --border: #e5e7eb;
+            --error: #ef4444;
+            --success: #10b981;
+            --info: #3b82f6;
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            --radius-sm: 0.25rem;
+            --radius-md: 0.5rem;
+            --radius-lg: 0.75rem;
+            --radius-xl: 1rem;
+            --transition: all 0.2s ease-in-out;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            background: linear-gradient(135deg, var(--surface) 0%, var(--background) 100%);
+            color: var(--text-color);
+            line-height: 1.6;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            width: 100%;
+            background: var(--background);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow-lg);
+            overflow: hidden;
+            transition: var(--transition);
+        }
+
+        header {
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-hover));
+            color: white;
+            padding: 2rem;
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            letter-spacing: -0.025em;
+        }
+
+        header p {
+            opacity: 0.9;
+            font-size: 1rem;
+        }
+
+        main {
+            padding: 2rem;
+        }
+
+        .tabs {
+            display: flex;
+            margin-bottom: 2rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .tab {
+            flex: 1;
+            padding: 1rem;
+            text-align: center;
+            cursor: pointer;
+            transition: var(--transition);
+            font-weight: 500;
+            position: relative;
+            color: var(--text-light);
+        }
+
+        .tab.active {
+            color: var(--primary-color);
+        }
+
+        .tab.active::after {
+            content: '';
+            position: absolute;
+            bottom: -1px;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: var(--primary-color);
+            border-radius: var(--radius-sm);
+        }
+
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.3s ease-in-out;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        label {
+            display: block;
+            font-weight: 500;
+            color: var(--text-color);
+            margin-bottom: 0.5rem;
+            font-size: 0.875rem;
+            letter-spacing: 0.025em;
+        }
+
+        input,
+        textarea,
+        select {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            font-size: 1rem;
+            transition: var(--transition);
+            background: var(--background);
+            color: var(--text-color);
+            font-family: inherit;
+        }
+
+        input:focus,
+        textarea:focus,
+        select:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 100px;
+            line-height: 1.5;
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        input[type="checkbox"] {
+            width: auto;
+            height: 1rem;
+            width: 1rem;
+            cursor: pointer;
+        }
+
+        button {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 0.875rem 1.5rem;
+            border-radius: var(--radius-md);
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition);
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        button:hover {
+            background: var(--primary-hover);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .result {
+            margin-top: 1.5rem;
+            border-radius: var(--radius-md);
+            overflow: hidden;
+            transition: var(--transition);
+        }
+
+        .message {
+            padding: 1rem;
+            border-radius: var(--radius-md);
+            margin-bottom: 1rem;
+            font-size: 0.875rem;
+            text-align: center;
+        }
+
+        .message.info {
+            background: rgba(59, 130, 246, 0.1);
+            color: var(--info);
+            border: 1px solid rgba(59, 130, 246, 0.2);
+        }
+
+        .message.error {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--error);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+        }
+
+        .message.success {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success);
+            border: 1px solid rgba(16, 185, 129, 0.2);
+        }
+
+        .image-container {
+            margin-top: 1rem;
+            border-radius: var(--radius-md);
+            overflow: hidden;
+            box-shadow: var(--shadow-md);
+            transition: var(--transition);
+            background: var(--surface);
+            padding: 1rem;
+        }
+
+        .image-container:hover {
+            box-shadow: var(--shadow-lg);
+        }
+
+        .image-container img {
+            max-width: 100%;
+            height: auto;
+            border-radius: var(--radius-sm);
+            display: block;
+            margin: 0 auto;
+            transition: var(--transition);
+        }
+
+        /* Loading spinner */
+        .loading {
+            display: inline-block;
+            width: 1.25rem;
+            height: 1.25rem;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+
+            .container {
+                border-radius: var(--radius-lg);
+            }
+
+            header {
+                padding: 1.5rem;
+            }
+
+            h1 {
+                font-size: 1.5rem;
+            }
+
+            main {
+                padding: 1.5rem;
+            }
+        }
+    </style>
+    <!-- Google Fonts - Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <h1>镇瑜的 图片A修改器</h1>
+            <p>通过 AI 技术将文字描述转换为精美图像</p>
+        </header>
+
+        <main>
+            <div class="tabs">
+                <div class="tab active" onclick="switchTab('text-to-image')">文生图</div>
+                <div class="tab" onclick="switchTab('image-to-image')">图文生图</div>
+            </div>
+
+            <!-- 文生图表单 -->
+            <div id="text-to-image" class="tab-content active">
+                <div class="form-group">
+                    <label for="text-prompt">图片描述</label>
+                    <textarea id="text-prompt" placeholder="请输入详细的图片描述..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="text-size">图片尺寸</label>
+                    <select id="text-size">
+                        <option value="2K">2K (2560×1440)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="text-watermark" checked>
+                        <label for="text-watermark">添加水印</label>
+                    </div>
+                </div>
+                <button id="text-button" onclick="generateTextToImage()">
+                    <span>生成图片</span>
+                </button>
+
+                <div id="text-result" class="result"></div>
+            </div>
+
+            <!-- 图文生图表单 -->
+            <div id="image-to-image" class="tab-content">
+                <div class="form-group">
+                    <label for="image-prompt">图片描述</label>
+                    <textarea id="image-prompt" placeholder="请输入详细的图片描述..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="reference-image">参考图片URL</label>
+                    <input type="text" id="reference-image" placeholder="https://example.com/image.jpg">
+                </div>
+                <div class="form-group">
+                    <label for="image-size">图片尺寸</label>
+                    <select id="image-size">
+                        <option value="2K">2K (2560×1440)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="image-watermark" checked>
+                        <label for="image-watermark">添加水印</label>
+                    </div>
+                </div>
+                <button id="image-button" onclick="generateImageToImage()">
+                    <span>生成图片</span>
+                </button>
+
+                <div id="image-result" class="result"></div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        function switchTab(tabName) {
+            // 隐藏所有标签内容
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+
+            // 移除所有标签的活动状态
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+
+            // 显示选中的标签内容
+            document.getElementById(tabName).classList.add('active');
+
+            // 设置选中标签为活动状态
+            event.currentTarget.classList.add('active');
+        }
+
+        function generateTextToImage() {
+            const prompt = document.getElementById('text-prompt').value;
+            const size = document.getElementById('text-size').value;
+            const watermark = document.getElementById('text-watermark').checked;
+            const button = document.getElementById('text-button');
+            const originalButtonText = button.innerHTML;
+
+            if (!prompt) {
+                showResult('text-result', '请输入图片描述', 'error');
+                return;
+            }
+
+            // 显示加载状态
+            button.disabled = true;
+            button.innerHTML = '<div class="loading"></div> <span>生成中...</span>';
+
+            showResult('text-result', '正在生成图片，请稍候...', 'info');
+
+            fetch('/api/generate/text-to-image', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    prompt: prompt,
+                    size: size,
+                    watermark: watermark
+                })
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        showImageResult('text-result', data.image_url);
+                    } else {
+                        showResult('text-result', data.error || '生成失败', 'error');
+                    }
+                })
+                .catch(error => {
+                    showResult('text-result', '请求失败: ' + error.message, 'error');
+                })
+                .finally(() => {
+                    // 恢复按钮状态
+                    button.disabled = false;
+                    button.innerHTML = originalButtonText;
+                });
+        }
+
+        function generateImageToImage() {
+            const prompt = document.getElementById('image-prompt').value;
+            const imageUrl = document.getElementById('reference-image').value;
+            const size = document.getElementById('image-size').value;
+            const watermark = document.getElementById('image-watermark').checked;
+            const button = document.getElementById('image-button');
+            const originalButtonText = button.innerHTML;
+
+            if (!prompt) {
+                showResult('image-result', '请输入图片描述', 'error');
+                return;
+            }
+
+            if (!imageUrl) {
+                showResult('image-result', '请输入参考图片URL', 'error');
+                return;
+            }
+
+            // 显示加载状态
+            button.disabled = true;
+            button.innerHTML = '<div class="loading"></div> <span>生成中...</span>';
+
+            showResult('image-result', '正在生成图片，请稍候...', 'info');
+
+            fetch('/api/generate/image-to-image', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    prompt: prompt,
+                    image_url: imageUrl,
+                    size: size,
+                    watermark: watermark
+                })
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        showImageResult('image-result', data.image_url);
+                    } else {
+                        showResult('image-result', data.error || '生成失败', 'error');
+                    }
+                })
+                .catch(error => {
+                    showResult('image-result', '请求失败: ' + error.message, 'error');
+                })
+                .finally(() => {
+                    // 恢复按钮状态
+                    button.disabled = false;
+                    button.innerHTML = originalButtonText;
+                });
+        }
+
+        function showResult(elementId, message, type) {
+            const resultElement = document.getElementById(elementId);
+            resultElement.innerHTML = `<div class="message ${type}">${message}</div>`;
+        }
+
+        function showImageResult(elementId, imageUrl) {
+            const resultElement = document.getElementById(elementId);
+            resultElement.innerHTML = `
+                <div class="message success">图片生成成功！</div>
+                <div class="image-container">
+                    <img src="${imageUrl}" alt="生成的图片">
+                </div>
+            `;
+        }
+    </script>
+</body>
+
+</html>
