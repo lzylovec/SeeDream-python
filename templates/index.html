@@ -619,6 +619,7 @@
                 ctx.save();
                 ctx.scale(dpi, dpi);
 
+                const now = performance.now();
                 for (let r = 0; r < rows; r++) {
                     for (let c = 0; c < cols; c++) {
                         const x = c * cell;
@@ -629,36 +630,38 @@
                         const dy = cy - mouse.y;
                         const dist = Math.sqrt(dx * dx + dy * dy);
                         const t = Math.max(0, 1 - dist / radius);
-                        const target = baseAlpha + t * (maxAlpha - baseAlpha);
+
+                        // 联动涟漪：计算当前像素格受到的环形影响
+                        let rippleInfluence = 0;
+                        for (let i = 0; i < ripples.length; i++) {
+                            const rp = ripples[i];
+                            const tr = Math.min((now - rp.start) / rp.duration, 1);
+                            if (tr <= 0 || tr >= 1) continue;
+                            const rr = rp.maxRadius * tr;
+                            const drx = cx - rp.x;
+                            const dry = cy - rp.y;
+                            const dr = Math.sqrt(drx * drx + dry * dry);
+                            const ringWidth = 80; // 波纹厚度
+                            const delta = Math.abs(dr - rr);
+                            const ringFactor = Math.max(0, 1 - delta / ringWidth);
+                            rippleInfluence = Math.max(rippleInfluence, ringFactor * rp.alpha);
+                        }
+
+                        const mouseTerm = t * (maxAlpha - baseAlpha);
+                        const rippleTerm = rippleInfluence * (maxAlpha - baseAlpha) * 0.8;
+                        const target = Math.min(maxAlpha, baseAlpha + mouseTerm + rippleTerm);
                         const idx = r * cols + c;
                         const prev = field[idx];
                         const next = initial ? target : lerp(prev, target, 0.18);
                         field[idx] = next;
 
-                        const fill = t > 0.15 ? toRGBA(accent, next) : (neutralPrefix + next + ')');
+                        const accentTrigger = Math.max(t, rippleInfluence * 0.9);
+                        const fill = accentTrigger > 0.15 ? toRGBA(accent, next) : (neutralPrefix + next + ')');
                         ctx.fillStyle = fill;
                         ctx.fillRect(x, y, cell - 1, cell - 1);
                     }
                 }
-                // 绘制背景涟漪
-                const now = performance.now();
-                ctx.globalCompositeOperation = 'lighter';
-                for (let i = ripples.length - 1; i >= 0; i--) {
-                    const rp = ripples[i];
-                    const t = Math.min((now - rp.start) / rp.duration, 1);
-                    const r = rp.maxRadius * t;
-                    const alpha = rp.alpha * (1 - t);
-                    const grad = ctx.createRadialGradient(rp.x, rp.y, 0, rp.x, rp.y, r);
-                    grad.addColorStop(0, `rgba(255,255,255,${alpha * 0.7})`);
-                    grad.addColorStop(0.55, toRGBA(accent, alpha * 0.55));
-                    grad.addColorStop(1, 'rgba(255,255,255,0)');
-                    ctx.fillStyle = grad;
-                    ctx.beginPath();
-                    ctx.arc(rp.x, rp.y, r, 0, Math.PI * 2);
-                    ctx.fill();
-                    if (t >= 1) ripples.splice(i, 1);
-                }
-                ctx.globalCompositeOperation = 'source-over';
+                // 涟漪与像素格已联动，取消叠加绘制
                 ctx.restore();
                 requestAnimationFrame(step);
             }
