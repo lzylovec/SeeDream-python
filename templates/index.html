@@ -280,23 +280,41 @@
             mix-blend-mode: screen;
         }
         /* 点击涟漪 */
-        .ripple {
-            position: absolute;
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-            pointer-events: none;
-            background: radial-gradient(closest-side, rgba(255,255,255,0.8), rgba(79,109,240,0.5) 60%, transparent 100%);
-            transform: scale(0);
-            opacity: 0.85;
-            animation: ripple 650ms ease-out forwards;
-        }
-        @keyframes ripple {
-            to {
-                transform: scale(22);
-                opacity: 0;
-            }
-        }
+         .ripple {
+             position: absolute;
+             width: 12px;
+             height: 12px;
+             border-radius: 50%;
+             pointer-events: none;
+             background: radial-gradient(closest-side, rgba(255,255,255,0.8), rgba(79,109,240,0.5) 60%, transparent 100%);
+             transform: scale(0);
+             opacity: 0.85;
+             animation: ripple 650ms ease-out forwards;
+         }
+         @keyframes ripple {
+             to {
+                 transform: scale(22);
+                 opacity: 0;
+             }
+         }
+         /* 背景板涟漪（更大、更柔） */
+         .ripple-bg {
+             position: absolute;
+             width: 16px;
+             height: 16px;
+             border-radius: 50%;
+             pointer-events: none;
+             background: radial-gradient(closest-side, rgba(255,255,255,0.55), rgba(79,109,240,0.35) 60%, transparent 100%);
+             transform: scale(0);
+             opacity: 0.40;
+             animation: ripple-bg 900ms ease-out forwards;
+         }
+         @keyframes ripple-bg {
+             to {
+                 transform: scale(60);
+                 opacity: 0;
+             }
+         }
 
         button:active {
             background: var(--accent);
@@ -568,6 +586,7 @@
             const accent = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim() || '#4f6df0';
             const neutralPrefix = 'rgba(31,41,55,'; // 深灰轻点
             let field = [];
+            let ripples = [];
 
             function resize() {
                 width = window.innerWidth;
@@ -621,6 +640,25 @@
                         ctx.fillRect(x, y, cell - 1, cell - 1);
                     }
                 }
+                // 绘制背景涟漪
+                const now = performance.now();
+                ctx.globalCompositeOperation = 'lighter';
+                for (let i = ripples.length - 1; i >= 0; i--) {
+                    const rp = ripples[i];
+                    const t = Math.min((now - rp.start) / rp.duration, 1);
+                    const r = rp.maxRadius * t;
+                    const alpha = rp.alpha * (1 - t);
+                    const grad = ctx.createRadialGradient(rp.x, rp.y, 0, rp.x, rp.y, r);
+                    grad.addColorStop(0, `rgba(255,255,255,${alpha * 0.7})`);
+                    grad.addColorStop(0.55, toRGBA(accent, alpha * 0.55));
+                    grad.addColorStop(1, 'rgba(255,255,255,0)');
+                    ctx.fillStyle = grad;
+                    ctx.beginPath();
+                    ctx.arc(rp.x, rp.y, r, 0, Math.PI * 2);
+                    ctx.fill();
+                    if (t >= 1) ripples.splice(i, 1);
+                }
+                ctx.globalCompositeOperation = 'source-over';
                 ctx.restore();
                 requestAnimationFrame(step);
             }
@@ -638,6 +676,19 @@
             } else {
                 window.addEventListener('resize', resize);
                 resize();
+                // 背景像素板点击涟漪，仅在非控件区域触发
+                window.addEventListener('mousedown', (e) => {
+                    if (prefersReduced || isMobile) return;
+                    if (e.target && e.target.closest('.container, button, a, input, textarea, select, label, .tab')) return;
+                    ripples.push({
+                        x: e.clientX,
+                        y: e.clientY,
+                        start: performance.now(),
+                        duration: 900,
+                        maxRadius: Math.max(width, height) * 0.45,
+                        alpha: 0.35
+                    });
+                }, { passive: true });
             }
         })();
     </script>
@@ -858,33 +909,52 @@
         const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
         const buttons = document.querySelectorAll('button');
         buttons.forEach(btn => {
-          const onMove = (e) => {
-            const rect = btn.getBoundingClientRect();
-            const x = e.clientX - rect.left;
-            const y = e.clientY - rect.top;
-            btn.style.setProperty('--mouse-x', x + 'px');
-            btn.style.setProperty('--mouse-y', y + 'px');
-            btn.style.setProperty('--glow-alpha', '1');
-          };
-          btn.addEventListener('mousemove', onMove);
-          btn.addEventListener('mouseleave', () => {
-            btn.style.setProperty('--glow-alpha', '0');
-          });
-          btn.addEventListener('mousedown', (e) => {
-            if (prefersReduced) return;
-            const rect = btn.getBoundingClientRect();
-            const x = e.clientX - rect.left;
-            const y = e.clientY - rect.top;
-            const ripple = document.createElement('span');
-            ripple.className = 'ripple';
-            ripple.style.left = (x - 6) + 'px';
-            ripple.style.top = (y - 6) + 'px';
-            btn.appendChild(ripple);
-            ripple.addEventListener('animationend', () => ripple.remove());
-          });
-        });
-      })();
-    </script>
+           const onMove = (e) => {
+             const rect = btn.getBoundingClientRect();
+             const x = e.clientX - rect.left;
+             const y = e.clientY - rect.top;
+             btn.style.setProperty('--mouse-x', x + 'px');
+             btn.style.setProperty('--mouse-y', y + 'px');
+             btn.style.setProperty('--glow-alpha', '1');
+           };
+           btn.addEventListener('mousemove', onMove);
+           btn.addEventListener('mouseleave', () => {
+             btn.style.setProperty('--glow-alpha', '0');
+           });
+           btn.addEventListener('mousedown', (e) => {
+             if (prefersReduced) return;
+             const rect = btn.getBoundingClientRect();
+             const x = e.clientX - rect.left;
+             const y = e.clientY - rect.top;
+             const ripple = document.createElement('span');
+             ripple.className = 'ripple';
+             ripple.style.left = (x - 6) + 'px';
+             ripple.style.top = (y - 6) + 'px';
+             btn.appendChild(ripple);
+             ripple.addEventListener('animationend', () => ripple.remove());
+           });
+         });
+
+         // 背景板（容器）点击涟漪
+         const container = document.querySelector('.container');
+         if (container) {
+           container.addEventListener('mousedown', (e) => {
+             if (prefersReduced) return;
+             // 避免与按钮/输入/标签等交互重复涟漪
+             if (e.target && e.target.closest('button, a, input, textarea, select, label, .tab')) return;
+             const rect = container.getBoundingClientRect();
+             const x = e.clientX - rect.left;
+             const y = e.clientY - rect.top;
+             const ripple = document.createElement('span');
+             ripple.className = 'ripple ripple-bg';
+             ripple.style.left = (x - 8) + 'px';
+             ripple.style.top = (y - 8) + 'px';
+             container.appendChild(ripple);
+             ripple.addEventListener('animationend', () => ripple.remove());
+           });
+         }
+       })();
+     </script>
     </body>
 
 </html>
