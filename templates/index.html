@@ -257,6 +257,8 @@
             align-items: center;
             justify-content: center;
             gap: 0.5rem;
+            position: relative;
+            overflow: hidden;
             box-shadow: 0 0 0 1px rgba(79,109,240,0.35), 0 10px 20px rgba(79,109,240,0.18);
         }
 
@@ -264,6 +266,36 @@
             background: linear-gradient(90deg, var(--accent-hover), var(--accent-cyan));
             transform: translateY(-1px);
             box-shadow: 0 0 0 1px rgba(79,109,240,0.45), 0 14px 26px rgba(79,109,240,0.22);
+        }
+        /* 鼠标跟踪高光 */
+        button::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            background: radial-gradient(180px circle at var(--mouse-x) var(--mouse-y), rgba(34,211,238,0.28), rgba(168,85,247,0.18) 30%, transparent 60%);
+            opacity: var(--glow-alpha, 0);
+            transition: opacity 0.18s ease;
+            filter: blur(10px);
+            mix-blend-mode: screen;
+        }
+        /* 点击涟漪 */
+        .ripple {
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            pointer-events: none;
+            background: radial-gradient(closest-side, rgba(255,255,255,0.8), rgba(79,109,240,0.5) 60%, transparent 100%);
+            transform: scale(0);
+            opacity: 0.85;
+            animation: ripple 650ms ease-out forwards;
+        }
+        @keyframes ripple {
+            to {
+                transform: scale(22);
+                opacity: 0;
+            }
         }
 
         button:active {
@@ -821,6 +853,38 @@
             }
         }
     </script>
-</body>
+<script>
+      (function(){
+        const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        const buttons = document.querySelectorAll('button');
+        buttons.forEach(btn => {
+          const onMove = (e) => {
+            const rect = btn.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            btn.style.setProperty('--mouse-x', x + 'px');
+            btn.style.setProperty('--mouse-y', y + 'px');
+            btn.style.setProperty('--glow-alpha', '1');
+          };
+          btn.addEventListener('mousemove', onMove);
+          btn.addEventListener('mouseleave', () => {
+            btn.style.setProperty('--glow-alpha', '0');
+          });
+          btn.addEventListener('mousedown', (e) => {
+            if (prefersReduced) return;
+            const rect = btn.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            const ripple = document.createElement('span');
+            ripple.className = 'ripple';
+            ripple.style.left = (x - 6) + 'px';
+            ripple.style.top = (y - 6) + 'px';
+            btn.appendChild(ripple);
+            ripple.addEventListener('animationend', () => ripple.remove());
+          });
+        });
+      })();
+    </script>
+    </body>
 
 </html>
