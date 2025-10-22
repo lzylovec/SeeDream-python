@@ -1,4 +1,4 @@
-# Seedream 图片生成 API 开发指南
+# 基于Seedream 图片生成 API 开发指南
 
 ## 项目概述
 

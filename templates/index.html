@@ -4,28 +4,32 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>镇瑜的 AI图片修改器</title>
+    <title>新文科 图片修改器</title>
     <style>
         :root {
-            --primary-color: #6366f1;
-            --primary-hover: #4f46e5;
-            --secondary-color: #f3f4f6;
-            --text-color: #374151;
+            --accent: #4f6df0;
+            --accent-hover: #3d5fde;
+            --text-color: #1f2937;
             --text-light: #6b7280;
-            --background: #ffffff;
-            --surface: #f9fafb;
-            --border: #e5e7eb;
+            --text-muted: #9ca3af;
+            --background: #f7f9fc;
+            --surface: #eef2f7;
+            --glass-bg: rgba(255, 255, 255, 0.7);
+            --glass-border: rgba(15, 23, 42, 0.08);
             --error: #ef4444;
             --success: #10b981;
             --info: #3b82f6;
-            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-            --radius-sm: 0.25rem;
-            --radius-md: 0.5rem;
-            --radius-lg: 0.75rem;
-            --radius-xl: 1rem;
-            --transition: all 0.2s ease-in-out;
+            --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.08);
+            --shadow-md: 0 8px 16px rgba(0, 0, 0, 0.10);
+            --shadow-lg: 0 16px 24px rgba(0, 0, 0, 0.12);
+            --radius-sm: 0.375rem;
+            --radius-md: 0.75rem;
+            --radius-lg: 1rem;
+            --radius-xl: 1.25rem;
+            --transition: all 0.22s ease;
+            /* 背景光晕变量 */
+            --bg-glow-1: rgba(79, 109, 240, 0.10);
+            --bg-glow-2: rgba(79, 109, 240, 0.08);
         }
 
         * {
@@ -36,43 +40,86 @@
 
         body {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-            background: linear-gradient(135deg, var(--surface) 0%, var(--background) 100%);
+            background:
+                radial-gradient(900px circle at -12% -12%, var(--bg-glow-1), transparent 65%),
+                radial-gradient(750px circle at 112% 122%, var(--bg-glow-2), transparent 60%),
+                linear-gradient(180deg, var(--background) 0%, var(--surface) 100%);
             color: var(--text-color);
             line-height: 1.6;
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 20px;
+            padding: 28px;
         }
 
         .container {
-            max-width: 800px;
+            max-width: 1100px;
             width: 100%;
-            background: var(--background);
+            background: var(--glass-bg);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--glass-border);
             border-radius: var(--radius-xl);
             box-shadow: var(--shadow-lg);
             overflow: hidden;
             transition: var(--transition);
+            position: relative;
+            z-index: 1;
+        }
+
+        #bg-canvas {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        #glass-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            pointer-events: none;
+        }
+        #glass-overlay::before,
+        #glass-overlay::after {
+            content: '';
+            position: absolute;
+            width: 540px;
+            height: 540px;
+            border-radius: 50%;
+            filter: blur(32px) saturate(120%);
+            opacity: 0.35;
+        }
+        #glass-overlay::before {
+            top: -80px;
+            left: -90px;
+            background: radial-gradient(60% 60% at 35% 35%, rgba(79, 109, 240, 0.22) 0%, rgba(79, 109, 240, 0.10) 40%, rgba(255, 255, 255, 0.06) 70%, transparent 100%);
+        }
+        #glass-overlay::after {
+            bottom: -120px;
+            right: -100px;
+            background: radial-gradient(60% 60% at 65% 65%, rgba(16, 185, 129, 0.18) 0%, rgba(16, 185, 129, 0.08) 40%, rgba(255, 255, 255, 0.05) 70%, transparent 100%);
         }
 
         header {
-            background: linear-gradient(135deg, var(--primary-color), var(--primary-hover));
-            color: white;
-            padding: 2rem;
+            background: var(--glass-bg);
+            border-bottom: 1px solid var(--glass-border);
+            color: var(--text-color);
+            padding: 1.75rem 2rem 1.25rem;
             text-align: center;
         }
 
         h1 {
-            font-size: 2rem;
+            font-size: 2.25rem;
             font-weight: 700;
-            margin-bottom: 0.5rem;
-            letter-spacing: -0.025em;
+            margin-bottom: 0.375rem;
+            letter-spacing: -0.02em;
         }
 
         header p {
-            opacity: 0.9;
-            font-size: 1rem;
+            color: var(--text-muted);
+            font-size: 0.95rem;
         }
 
         main {
@@ -81,39 +128,37 @@
 
         .tabs {
             display: flex;
-            margin-bottom: 2rem;
-            border-bottom: 1px solid var(--border);
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
         }
 
         .tab {
-            flex: 1;
-            padding: 1rem;
+            flex: none;
+            padding: 0.65rem 1rem;
             text-align: center;
             cursor: pointer;
             transition: var(--transition);
             font-weight: 500;
-            position: relative;
+            font-size: 0.98rem;
             color: var(--text-light);
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 999px;
+        }
+
+        .tab:hover {
+            color: var(--text-color);
         }
 
         .tab.active {
-            color: var(--primary-color);
-        }
-
-        .tab.active::after {
-            content: '';
-            position: absolute;
-            bottom: -1px;
-            left: 0;
-            width: 100%;
-            height: 3px;
-            background: var(--primary-color);
-            border-radius: var(--radius-sm);
+            color: var(--text-color);
+            background: rgba(79, 109, 240, 0.1);
+            border-color: var(--accent);
         }
 
         .tab-content {
             display: none;
-            animation: fadeIn 0.3s ease-in-out;
+            animation: fadeIn 0.2s ease-in-out;
         }
 
         .tab-content.active {
@@ -123,7 +168,7 @@
         @keyframes fadeIn {
             from {
                 opacity: 0;
-                transform: translateY(10px);
+                transform: translateY(6px);
             }
 
             to {
@@ -133,44 +178,48 @@
         }
 
         .form-group {
-            margin-bottom: 1.5rem;
+            margin-bottom: 1.1rem;
         }
 
         label {
             display: block;
-            font-weight: 500;
+            font-weight: 600;
             color: var(--text-color);
-            margin-bottom: 0.5rem;
-            font-size: 0.875rem;
-            letter-spacing: 0.025em;
+            margin-bottom: 0.45rem;
+            font-size: 0.9rem;
+            letter-spacing: 0.01em;
         }
 
-        input,
-        textarea,
-        select {
+        input, textarea, select {
             width: 100%;
-            padding: 0.75rem 1rem;
-            border: 1px solid var(--border);
+            padding: 0.85rem 1rem;
+            border: 1px solid var(--glass-border);
             border-radius: var(--radius-md);
-            font-size: 1rem;
+            font-size: 1.05rem;
             transition: var(--transition);
-            background: var(--background);
+            background: rgba(255, 255, 255, 0.85);
             color: var(--text-color);
             font-family: inherit;
+        }
+
+        input::placeholder,
+        textarea::placeholder {
+            color: var(--text-light);
         }
 
         input:focus,
         textarea:focus,
         select:focus {
             outline: none;
-            border-color: var(--primary-color);
-            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(79, 109, 240, 0.12);
+            background: #ffffff;
         }
 
         textarea {
             resize: vertical;
-            min-height: 100px;
-            line-height: 1.5;
+            min-height: 110px;
+            line-height: 1.6;
         }
 
         .checkbox-group {
@@ -180,84 +229,74 @@
         }
 
         input[type="checkbox"] {
-            width: auto;
-            height: 1rem;
             width: 1rem;
+            height: 1rem;
             cursor: pointer;
         }
 
         button {
-            background: var(--primary-color);
+            background: var(--accent);
             color: white;
             border: none;
-            padding: 0.875rem 1.5rem;
+            padding: 0.9rem 1.2rem;
             border-radius: var(--radius-md);
-            font-size: 1rem;
-            font-weight: 500;
+            font-size: 1.06rem;
+            font-weight: 600;
             cursor: pointer;
             transition: var(--transition);
             width: 100%;
-            display: flex;
+            display: inline-flex;
             align-items: center;
             justify-content: center;
             gap: 0.5rem;
+            box-shadow: var(--shadow-sm);
         }
 
         button:hover {
-            background: var(--primary-hover);
-            transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+            background: var(--accent-hover);
         }
 
         button:active {
-            transform: translateY(0);
+            background: var(--accent);
         }
 
         .result {
-            margin-top: 1.5rem;
+            margin-top: 1.1rem;
             border-radius: var(--radius-md);
             overflow: hidden;
             transition: var(--transition);
         }
 
         .message {
-            padding: 1rem;
+            padding: 0.85rem;
             border-radius: var(--radius-md);
-            margin-bottom: 1rem;
-            font-size: 0.875rem;
+            margin-bottom: 0.85rem;
+            font-size: 0.9rem;
             text-align: center;
+            border: 1px solid var(--glass-border);
+            background: var(--glass-bg);
         }
 
         .message.info {
-            background: rgba(59, 130, 246, 0.1);
             color: var(--info);
-            border: 1px solid rgba(59, 130, 246, 0.2);
         }
 
         .message.error {
-            background: rgba(239, 68, 68, 0.1);
             color: var(--error);
-            border: 1px solid rgba(239, 68, 68, 0.2);
         }
 
         .message.success {
-            background: rgba(16, 185, 129, 0.1);
             color: var(--success);
-            border: 1px solid rgba(16, 185, 129, 0.2);
         }
 
         .image-container {
-            margin-top: 1rem;
+            margin-top: 0.7rem;
             border-radius: var(--radius-md);
             overflow: hidden;
-            box-shadow: var(--shadow-md);
             transition: var(--transition);
-            background: var(--surface);
-            padding: 1rem;
-        }
-
-        .image-container:hover {
-            box-shadow: var(--shadow-lg);
+            background: #ffffff;
+            padding: 0.7rem;
+            border: 1px solid var(--glass-border);
         }
 
         .image-container img {
@@ -266,15 +305,71 @@
             border-radius: var(--radius-sm);
             display: block;
             margin: 0 auto;
-            transition: var(--transition);
+        }
+
+        /* Upload area and thumbs */
+        .upload-area {
+            border: 2px dashed var(--glass-border);
+            background: var(--glass-bg);
+            border-radius: var(--radius-lg);
+            padding: 1.2rem;
+            text-align: center;
+            color: var(--text-light);
+        }
+
+        .upload-icon {
+            font-size: 1.5rem;
+        }
+
+        .upload-text {
+            margin-top: 0.25rem;
+            font-weight: 600;
+            color: var(--text-color);
+        }
+
+        .upload-hint {
+            margin-top: 0.25rem;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .thumb-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-top: 0.6rem;
+        }
+
+        .thumb-item {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-md);
+            padding: 8px;
+        }
+
+        .thumb-item img {
+            width: 100%;
+            height: 110px;
+            object-fit: cover;
+            border-radius: var(--radius-sm);
+        }
+
+        .thumb-name {
+            display: block;
+            margin-top: 6px;
+            font-size: 0.8rem;
+            color: var(--text-light);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
         /* Loading spinner */
         .loading {
             display: inline-block;
-            width: 1.25rem;
-            height: 1.25rem;
-            border: 2px solid rgba(255, 255, 255, 0.3);
+            width: 1.05rem;
+            height: 1.05rem;
+            border: 2px solid rgba(255, 255, 255, 0.6);
             border-radius: 50%;
             border-top-color: white;
             animation: spin 1s ease-in-out infinite;
@@ -288,7 +383,11 @@
 
         @media (max-width: 768px) {
             body {
-                padding: 10px;
+                padding: 16px;
+                background:
+                    radial-gradient(650px circle at -20% -20%, var(--bg-glow-1), transparent 68%),
+                    radial-gradient(520px circle at 115% 120%, var(--bg-glow-2), transparent 62%),
+                    linear-gradient(180deg, var(--background) 0%, var(--surface) 100%);
             }
 
             .container {
@@ -296,15 +395,19 @@
             }
 
             header {
-                padding: 1.5rem;
+                padding: 1.4rem;
             }
 
             h1 {
-                font-size: 1.5rem;
+                font-size: 1.6rem;
             }
 
             main {
-                padding: 1.5rem;
+                padding: 1.1rem;
+            }
+
+            .thumb-grid {
+                grid-template-columns: repeat(2, 1fr);
             }
         }
     </style>
@@ -315,9 +418,11 @@
 </head>
 
 <body>
-    <div class="container">
+     <canvas id="bg-canvas" aria-hidden="true"></canvas>
+     <div id="glass-overlay" aria-hidden="true"></div>
+     <div class="container">
         <header>
-            <h1>镇瑜的 图片A修改器</h1>
+            <h1>新文科 图片修改器</h1>
             <p>通过 AI 技术将文字描述转换为精美图像</p>
         </header>
 
@@ -325,6 +430,7 @@
             <div class="tabs">
                 <div class="tab active" onclick="switchTab('text-to-image')">文生图</div>
                 <div class="tab" onclick="switchTab('image-to-image')">图文生图</div>
+                <div class="tab" onclick="switchTab('bulk-select')">批量优选</div>
             </div>
 
             <!-- 文生图表单 -->
@@ -380,8 +486,119 @@
 
                 <div id="image-result" class="result"></div>
             </div>
+
+            <!-- 批量优选 -->
+            <div id="bulk-select" class="tab-content">
+                <div class="form-group">
+                    <label for="bulk-images">上传图片（可多选）</label>
+                    <div class="upload-area" onclick="document.getElementById('bulk-images').click()">
+                        <div class="upload-icon">📁</div>
+                        <div class="upload-text">点击选择或拖拽图片到此处</div>
+                        <div class="upload-hint">最多选择 20 张，支持 JPG/PNG/WebP</div>
+                    </div>
+                    <input type="file" id="bulk-images" accept="image/*" multiple style="display:none"
+                        onchange="updateBulkPreview()">
+                </div>
+                <div id="bulk-preview" class="thumb-grid"></div>
+                <button id="bulk-button" onclick="generateBestImageSelection()">
+                    <span>开始优选</span>
+                </button>
+                <div id="bulk-result" class="result"></div>
+            </div>
+
         </main>
     </div>
+
+    <script>
+        // 动态像素背景（Canvas）
+        (function () {
+            const canvas = document.getElementById('bg-canvas');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            let dpi = window.devicePixelRatio || 1;
+
+            let mouse = { x: -9999, y: -9999 };
+            let width = 0, height = 0, cols = 0, rows = 0;
+            const cell = 30; // 像素方格大小
+            const radius = 50; // 影响半径（更小范围）
+            const baseAlpha = 0.04; // 基础透明度
+            const maxAlpha = 0.5; // 鼠标附近增强透明度（更亮）
+            const accent = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim() || '#4f6df0';
+            const neutralPrefix = 'rgba(31,41,55,'; // 深灰轻点
+            let field = [];
+
+            function resize() {
+                width = window.innerWidth;
+                height = window.innerHeight;
+                canvas.style.width = width + 'px';
+                canvas.style.height = height + 'px';
+                canvas.width = Math.floor(width * dpi);
+                canvas.height = Math.floor(height * dpi);
+                cols = Math.ceil(width / cell);
+                rows = Math.ceil(height / cell);
+                field = new Array(cols * rows).fill(baseAlpha);
+                draw(true);
+            }
+
+            function lerp(a, b, t) { return a + (b - a) * t; }
+
+            function toRGBA(hex, alpha) {
+                // 简单hex转rgba，仅支持 #rrggbb
+                const m = hex.match(/^#([0-9a-fA-F]{6})$/);
+                if (!m) return `rgba(79,109,240,${alpha})`;
+                const int = parseInt(m[1], 16);
+                const r = (int >> 16) & 255;
+                const g = (int >> 8) & 255;
+                const b = int & 255;
+                return `rgba(${r},${g},${b},${alpha})`;
+            }
+
+            function draw(initial) {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                ctx.save();
+                ctx.scale(dpi, dpi);
+
+                for (let r = 0; r < rows; r++) {
+                    for (let c = 0; c < cols; c++) {
+                        const x = c * cell;
+                        const y = r * cell;
+                        const cx = x + cell / 2;
+                        const cy = y + cell / 2;
+                        const dx = cx - mouse.x;
+                        const dy = cy - mouse.y;
+                        const dist = Math.sqrt(dx * dx + dy * dy);
+                        const t = Math.max(0, 1 - dist / radius);
+                        const target = baseAlpha + t * (maxAlpha - baseAlpha);
+                        const idx = r * cols + c;
+                        const prev = field[idx];
+                        const next = initial ? target : lerp(prev, target, 0.18);
+                        field[idx] = next;
+
+                        const fill = t > 0.15 ? toRGBA(accent, next) : (neutralPrefix + next + ')');
+                        ctx.fillStyle = fill;
+                        ctx.fillRect(x, y, cell - 1, cell - 1);
+                    }
+                }
+                ctx.restore();
+                requestAnimationFrame(step);
+            }
+
+            function step() { draw(false); }
+
+            window.addEventListener('mousemove', (e) => { mouse.x = e.clientX; mouse.y = e.clientY; }, { passive: true });
+            window.addEventListener('mouseleave', () => { mouse.x = -9999; mouse.y = -9999; });
+
+            const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+            const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+            if (prefersReduced || isMobile) {
+                const el = document.getElementById('bg-canvas');
+                if (el) el.style.display = 'none';
+            } else {
+                window.addEventListener('resize', resize);
+                resize();
+            }
+        })();
+    </script>
 
     <script>
         function switchTab(tabName) {
@@ -516,6 +733,82 @@
                     <img src="${imageUrl}" alt="生成的图片">
                 </div>
             `;
+        }
+
+        function generateBestImageSelection() {
+            const input = document.getElementById('bulk-images');
+            const files = Array.from(input.files);
+            const button = document.getElementById('bulk-button');
+            const originalButtonText = button.innerHTML;
+
+            if (!files.length) {
+                showResult('bulk-result', '请至少选择一张图片', 'error');
+                return;
+            }
+
+            button.disabled = true;
+            button.innerHTML = '<div class="loading"></div> <span>优选中...</span>';
+            showResult('bulk-result', '正在评估图片质量，请稍候...', 'info');
+
+            const formData = new FormData();
+            files.forEach(file => formData.append('images', file));
+
+            fetch('/api/select/best-image', {
+                method: 'POST',
+                body: formData
+            })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        const imgSrc = `data:image/${data.format || 'jpeg'};base64,${data.best_image_b64}`;
+                        const resultElement = document.getElementById('bulk-result');
+                        const scoreList = (data.scores || []).map((s, i) => `<li>图片 ${i + 1}: ${Number(s).toFixed(3)}</li>`).join('');
+                        resultElement.innerHTML = `
+                            <div class="message success">优选完成，最佳图片为第 ${data.best_index + 1} 张</div>
+                            <div class="image-container">
+                                <img src="${imgSrc}" alt="最佳图片">
+                            </div>
+                            <div class="message info" style="margin-top:0.75rem;">
+                                评分列表：
+                                <ul style="margin-top:0.5rem; text-align:left; padding-left:1.25rem;">
+                                    ${scoreList}
+                                </ul>
+                            </div>
+                        `;
+                    } else {
+                        showResult('bulk-result', data.error || '优选失败', 'error');
+                    }
+                })
+                .catch(err => {
+                    showResult('bulk-result', '请求失败: ' + err.message, 'error');
+                })
+                .finally(() => {
+                    button.disabled = false;
+                    button.innerHTML = originalButtonText;
+                });
+        }
+
+        function updateBulkPreview() {
+            const input = document.getElementById('bulk-images');
+            const files = Array.from(input.files);
+            const preview = document.getElementById('bulk-preview');
+            if (!files.length) { preview.innerHTML = ''; return; }
+            const max = Math.min(files.length, 12);
+            preview.innerHTML = '';
+            for (let i = 0; i < max; i++) {
+                const file = files[i];
+                const reader = new FileReader();
+                reader.onload = e => {
+                    const div = document.createElement('div');
+                    div.className = 'thumb-item';
+                    div.innerHTML = `
+                        <img src="${e.target.result}" alt="${file.name}">
+                        <span class="thumb-name">${file.name}</span>
+                    `;
+                    preview.appendChild(div);
+                };
+                reader.readAsDataURL(file);
+            }
         }
     </script>
 </body>
