@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>新文科 图片修改器</title>
+    <title>影像魔方</title>
     <style>
         :root {
             --accent: #4f6df0;
@@ -53,11 +53,11 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 28px;
+            padding: 18px;
         }
 
         .container {
-            max-width: 1100px;
+            max-width: 1280px;
             width: 100%;
             background: var(--glass-bg);
             backdrop-filter: blur(12px);
@@ -85,9 +85,10 @@
             pointer-events: none;
             /* 科技感网格叠加 */
             background-image:
-                repeating-linear-gradient(0deg, rgba(31,41,55,0.05) 0px, rgba(31,41,55,0.05) 1px, transparent 1px, transparent 24px),
-                repeating-linear-gradient(90deg, rgba(31,41,55,0.04) 0px, rgba(31,41,55,0.04) 1px, transparent 1px, transparent 24px);
+                repeating-linear-gradient(0deg, rgba(31, 41, 55, 0.05) 0px, rgba(31, 41, 55, 0.05) 1px, transparent 1px, transparent 24px),
+                repeating-linear-gradient(90deg, rgba(31, 41, 55, 0.04) 0px, rgba(31, 41, 55, 0.04) 1px, transparent 1px, transparent 24px);
         }
+
         #glass-overlay::before,
         #glass-overlay::after {
             content: '';
@@ -98,11 +99,13 @@
             filter: blur(32px) saturate(120%);
             opacity: 0.35;
         }
+
         #glass-overlay::before {
             top: -80px;
             left: -90px;
             background: radial-gradient(60% 60% at 35% 35%, rgba(79, 109, 240, 0.22) 0%, rgba(79, 109, 240, 0.10) 40%, rgba(255, 255, 255, 0.06) 70%, transparent 100%);
         }
+
         #glass-overlay::after {
             bottom: -120px;
             right: -100px;
@@ -159,9 +162,9 @@
 
         .tab.active {
             color: var(--text-color);
-            background: linear-gradient(90deg, rgba(79,109,240,0.12), rgba(34,211,238,0.10));
+            background: linear-gradient(90deg, rgba(79, 109, 240, 0.12), rgba(34, 211, 238, 0.10));
             border-color: var(--accent);
-            box-shadow: 0 0 0 1px rgba(79,109,240,0.35), 0 0 14px rgba(79,109,240,0.18);
+            box-shadow: 0 0 0 1px rgba(79, 109, 240, 0.35), 0 0 14px rgba(79, 109, 240, 0.18);
         }
 
         .tab-content {
@@ -198,7 +201,9 @@
             letter-spacing: 0.01em;
         }
 
-        input, textarea, select {
+        input,
+        textarea,
+        select {
             width: 100%;
             padding: 0.85rem 1rem;
             border: 1px solid var(--glass-border);
@@ -259,62 +264,67 @@
             gap: 0.5rem;
             position: relative;
             overflow: hidden;
-            box-shadow: 0 0 0 1px rgba(79,109,240,0.35), 0 10px 20px rgba(79,109,240,0.18);
+            box-shadow: 0 0 0 1px rgba(79, 109, 240, 0.35), 0 10px 20px rgba(79, 109, 240, 0.18);
         }
 
         button:hover {
             background: linear-gradient(90deg, var(--accent-hover), var(--accent-cyan));
             transform: translateY(-1px);
-            box-shadow: 0 0 0 1px rgba(79,109,240,0.45), 0 14px 26px rgba(79,109,240,0.22);
+            box-shadow: 0 0 0 1px rgba(79, 109, 240, 0.45), 0 14px 26px rgba(79, 109, 240, 0.22);
         }
+
         /* 鼠标跟踪高光 */
         button::before {
             content: "";
             position: absolute;
             inset: 0;
             pointer-events: none;
-            background: radial-gradient(180px circle at var(--mouse-x) var(--mouse-y), rgba(34,211,238,0.28), rgba(168,85,247,0.18) 30%, transparent 60%);
+            background: radial-gradient(180px circle at var(--mouse-x) var(--mouse-y), rgba(34, 211, 238, 0.28), rgba(168, 85, 247, 0.18) 30%, transparent 60%);
             opacity: var(--glow-alpha, 0);
             transition: opacity 0.18s ease;
             filter: blur(10px);
             mix-blend-mode: screen;
         }
+
         /* 点击涟漪 */
-         .ripple {
-             position: absolute;
-             width: 12px;
-             height: 12px;
-             border-radius: 50%;
-             pointer-events: none;
-             background: radial-gradient(closest-side, rgba(255,255,255,0.8), rgba(79,109,240,0.5) 60%, transparent 100%);
-             transform: scale(0);
-             opacity: 0.85;
-             animation: ripple 650ms ease-out forwards;
-         }
-         @keyframes ripple {
-             to {
-                 transform: scale(22);
-                 opacity: 0;
-             }
-         }
-         /* 背景板涟漪（更大、更柔） */
-         .ripple-bg {
-             position: absolute;
-             width: 16px;
-             height: 16px;
-             border-radius: 50%;
-             pointer-events: none;
-             background: radial-gradient(closest-side, rgba(255,255,255,0.55), rgba(79,109,240,0.35) 60%, transparent 100%);
-             transform: scale(0);
-             opacity: 0.40;
-             animation: ripple-bg 900ms ease-out forwards;
-         }
-         @keyframes ripple-bg {
-             to {
-                 transform: scale(60);
-                 opacity: 0;
-             }
-         }
+        .ripple {
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            pointer-events: none;
+            background: radial-gradient(closest-side, rgba(255, 255, 255, 0.8), rgba(79, 109, 240, 0.5) 60%, transparent 100%);
+            transform: scale(0);
+            opacity: 0.85;
+            animation: ripple 650ms ease-out forwards;
+        }
+
+        @keyframes ripple {
+            to {
+                transform: scale(22);
+                opacity: 0;
+            }
+        }
+
+        /* 背景板涟漪（更大、更柔） */
+        .ripple-bg {
+            position: absolute;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            pointer-events: none;
+            background: radial-gradient(closest-side, rgba(255, 255, 255, 0.55), rgba(79, 109, 240, 0.35) 60%, transparent 100%);
+            transform: scale(0);
+            opacity: 0.40;
+            animation: ripple-bg 900ms ease-out forwards;
+        }
+
+        @keyframes ripple-bg {
+            to {
+                transform: scale(60);
+                opacity: 0;
+            }
+        }
 
         button:active {
             background: var(--accent);
@@ -393,9 +403,14 @@
             color: var(--text-muted);
         }
 
+        .upload-area.dragover {
+            border-color: var(--accent);
+            background: rgba(79, 109, 240, 0.08);
+        }
+
         .thumb-grid {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
+            grid-template-columns: repeat(4, 1fr);
             gap: 10px;
             margin-top: 0.6rem;
         }
@@ -422,6 +437,24 @@
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
+        }
+
+        /* 角色舞台样式 */
+        .character-stage {
+            position: relative;
+            margin: 0.8rem 0 1rem;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--glass-border);
+            background: var(--glass-bg);
+            overflow: hidden;
+            height: auto;
+            min-height: 220px;
+        }
+
+        .character-stage canvas {
+            width: 100%;
+            height: 100%;
+            display: block;
         }
 
         /* Loading spinner */
@@ -470,6 +503,130 @@
                 grid-template-columns: repeat(2, 1fr);
             }
         }
+
+        /* Hero & Features */
+        header.hero {
+            padding: 2rem 2rem 1.25rem;
+            text-align: left;
+            background: var(--glass-bg);
+            border-bottom: 1px solid var(--glass-border);
+        }
+
+        .topbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+        }
+
+        .brand-logo {
+            font-weight: 700;
+            letter-spacing: 0.02em;
+            color: var(--text-color);
+        }
+
+        .login-link {
+            color: var(--text-light);
+            text-decoration: none;
+            font-weight: 600;
+            border: 1px solid var(--glass-border);
+            padding: 0.42rem 0.8rem;
+            border-radius: 999px;
+            transition: var(--transition);
+        }
+
+        .login-link:hover {
+            color: var(--text-color);
+            border-color: var(--accent);
+            box-shadow: 0 0 0 1px rgba(79, 109, 240, 0.35);
+        }
+
+        .hero-inner {
+            display: grid;
+            grid-template-columns: 1.1fr 0.9fr;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .hero-title {
+            font-size: 2.8rem;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+            margin-bottom: 0.5rem;
+        }
+
+        .accent-gradient {
+            background: linear-gradient(90deg, var(--accent), var(--accent-purple), var(--accent-cyan));
+            -webkit-background-clip: text;
+            color: transparent;
+        }
+
+        .hero-subtitle {
+            color: var(--text-light);
+            font-size: 1.05rem;
+            margin-bottom: 1rem;
+        }
+
+        .hero-cta {
+            width: auto;
+            padding: 0.9rem 1.6rem;
+            font-size: 1.05rem;
+        }
+
+        .hero-visual .character-stage {
+            margin-top: 0;
+        }
+
+        .feature-cards {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+            padding: 1.25rem 0 0;
+        }
+
+        .feature-card {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            padding: 1rem;
+            box-shadow: var(--shadow-md);
+            transition: var(--transition);
+            cursor: pointer;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .feature-icon {
+            font-size: 1.6rem;
+        }
+
+        .feature-title {
+            font-weight: 700;
+            margin-top: 0.4rem;
+        }
+
+        .feature-desc {
+            color: var(--text-muted);
+            font-size: 0.92rem;
+            margin-top: 0.25rem;
+        }
+
+        @media (max-width: 768px) {
+            .hero-inner {
+                grid-template-columns: 1fr;
+            }
+
+            .feature-cards {
+                grid-template-columns: 1fr;
+            }
+
+            .hero-title {
+                font-size: 2rem;
+            }
+        }
     </style>
     <!-- Google Fonts - Inter -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -478,12 +635,53 @@
 </head>
 
 <body>
-     <canvas id="bg-canvas" aria-hidden="true"></canvas>
-     <div id="glass-overlay" aria-hidden="true"></div>
-     <div class="container">
-        <header>
-            <h1>新文科 图片修改器</h1>
-            <p>通过 AI 技术将文字描述转换为精美图像</p>
+    <canvas id="bg-canvas" aria-hidden="true"></canvas>
+    <div id="glass-overlay" aria-hidden="true"></div>
+    <div class="container">
+        <header class="hero">
+            <div class="topbar">
+                <div class="brand"><span class="brand-logo">Image Cube</span></div>
+                <a class="login-link" href="#" onclick="scrollToGenerator()">开始体验</a>
+            </div>
+            <div class="hero-inner">
+                <div class="hero-copy">
+                    <h1 class="hero-title">影像魔方 · <span class="accent-gradient">AI修图</span></h1>
+                    <p class="hero-subtitle">一键文生图、图文生图、批量优选，轻松生成素材</p>
+                    <button class="hero-cta" id="hero-cta" onclick="scrollToGenerator()">开始生成</button>
+                </div>
+                <div class="hero-visual">
+                    <div class="character-stage">
+                        <canvas id="character-canvas"></canvas>
+                        <video id="character-video" muted playsinline preload="auto" style="display:none"></video>
+                        <video id="warning-video" muted playsinline preload="auto" style="display:none"></video>
+                        <!-- 灵动视频元素 -->
+                        <video id="action-video-1" muted playsinline preload="auto" style="display:none"></video>
+                        <video id="action-video-2" muted playsinline preload="auto" style="display:none"></video>
+                        <video id="action-video-3" muted playsinline preload="auto" style="display:none"></video>
+                        <video id="action-video-4" muted playsinline preload="auto" style="display:none"></video>
+                    </div>
+                </div>
+            </div>
+            <div class="feature-cards">
+                <div class="feature-card"
+                    onclick="document.querySelector('.tab:nth-child(1)').click(); document.querySelector('main').scrollIntoView({behavior:'smooth'});">
+                    <div class="feature-icon">📝</div>
+                    <div class="feature-title">文生图</div>
+                    <div class="feature-desc">输入描述，AI生成精美图片</div>
+                </div>
+                <div class="feature-card"
+                    onclick="document.querySelector('.tab:nth-child(2)').click(); document.querySelector('main').scrollIntoView({behavior:'smooth'});">
+                    <div class="feature-icon">🖼️</div>
+                    <div class="feature-title">图文生图</div>
+                    <div class="feature-desc">参考图片+描述，高质量生成</div>
+                </div>
+                <div class="feature-card"
+                    onclick="document.querySelector('.tab:nth-child(3)').click(); document.querySelector('main').scrollIntoView({behavior:'smooth'});">
+                    <div class="feature-icon">✨</div>
+                    <div class="feature-title">批量优选</div>
+                    <div class="feature-desc">一次上传，多维评分选最优</div>
+                </div>
+            </div>
         </header>
 
         <main>
@@ -491,6 +689,7 @@
                 <div class="tab active" onclick="switchTab('text-to-image')">文生图</div>
                 <div class="tab" onclick="switchTab('image-to-image')">图文生图</div>
                 <div class="tab" onclick="switchTab('bulk-select')">批量优选</div>
+                <div class="tab" onclick="switchTab('history')">历史记录</div>
             </div>
 
             <!-- 文生图表单 -->
@@ -525,7 +724,18 @@
                     <textarea id="image-prompt" placeholder="请输入详细的图片描述..."></textarea>
                 </div>
                 <div class="form-group">
-                    <label for="reference-image">参考图片URL</label>
+                    <label>参考图片（拖拽上传或点击选择）</label>
+                    <div id="ref-upload-area" class="upload-area" onclick="document.getElementById('ref-file').click()">
+                        <div class="upload-icon">🖼️</div>
+                        <div class="upload-text">拖拽图片到此处，或点击选择</div>
+                        <div class="upload-hint">支持 JPG/PNG/WebP，上传后自动生成URL</div>
+                    </div>
+                    <input type="file" id="ref-file" accept="image/*" style="display:none" onchange="handleRefFileSelect(event)">
+                    <div id="ref-preview" class="thumb-grid" style="grid-template-columns: repeat(1, 1fr);"></div>
+                    <div id="ref-upload-result" class="result"></div>
+                </div>
+                <div class="form-group">
+                    <label for="reference-image">参考图片URL（可选，上传后自动填充）</label>
                     <input type="text" id="reference-image" placeholder="https://example.com/image.jpg">
                 </div>
                 <div class="form-group">
@@ -564,6 +774,15 @@
                     <span>开始优选</span>
                 </button>
                 <div id="bulk-result" class="result"></div>
+            </div>
+
+            <!-- 历史记录 -->
+            <div id="history" class="tab-content">
+                <div class="form-group" style="display:flex; gap:8px; align-items:center; justify-content:flex-end;">
+                    <button onclick="loadHistory()" style="min-width:110px"><span>刷新历史</span></button>
+                </div>
+                <div id="history-grid" class="thumb-grid"></div>
+                <div id="history-result" class="result"></div>
             </div>
 
         </main>
@@ -713,6 +932,21 @@
 
             // 设置选中标签为活动状态
             event.currentTarget.classList.add('active');
+
+            // 如果是历史记录标签，加载数据
+            if (tabName === 'history') {
+                loadHistory(true);
+            }
+        }
+
+        // Hero 区域 CTA 快速跳转到生成模块
+        function scrollToGenerator() {
+            const firstTab = document.querySelector('.tab:nth-child(1)');
+            if (firstTab) firstTab.click();
+            const main = document.querySelector('main');
+            if (main) main.scrollIntoView({ behavior: 'smooth' });
+            const prompt = document.getElementById('text-prompt');
+            if (prompt) prompt.focus();
         }
 
         function generateTextToImage() {
@@ -723,13 +957,42 @@
             const originalButtonText = button.innerHTML;
 
             if (!prompt) {
+                console.log('用户未输入描述，准备播放警告动画');
+                // 播放警告动画
+                if (typeof playWarningAnimation === 'function') {
+                    console.log('调用playWarningAnimation函数');
+                    playWarningAnimation();
+                } else {
+                    console.error('playWarningAnimation函数不存在');
+                }
                 showResult('text-result', '请输入图片描述', 'error');
                 return;
+            }
+
+            // 停止警告动画，开始正常的角色动画
+            if (typeof stopCharacterAnimation === 'function') {
+                stopCharacterAnimation();
+            }
+            if (typeof playCharacterAnimation === 'function') {
+                playCharacterAnimation();
             }
 
             // 显示加载状态
             button.disabled = true;
             button.innerHTML = '<div class="loading"></div> <span>生成中...</span>';
+
+            // 开始循环播放角色动画
+            console.log('开始图片生成，启动角色动画循环播放');
+            if (typeof playCharacterAnimation === 'function') {
+                try {
+                    playCharacterAnimation(true); // 传入true启用循环播放
+                    console.log('角色动画已启动');
+                } catch (e) {
+                    console.error('启动角色动画失败:', e);
+                }
+            } else {
+                console.warn('playCharacterAnimation函数未找到');
+            }
 
             showResult('text-result', '正在生成图片，请稍候...', 'info');
 
@@ -756,6 +1019,32 @@
                     showResult('text-result', '请求失败: ' + error.message, 'error');
                 })
                 .finally(() => {
+                    // 停止角色动画播放
+                    console.log('图片生成完成，停止角色动画');
+                    if (typeof stopCharacterAnimation === 'function') {
+                        try {
+                            stopCharacterAnimation();
+                            console.log('角色动画已停止');
+                        } catch (e) {
+                            console.error('停止角色动画失败:', e);
+                        }
+                    } else {
+                        console.warn('stopCharacterAnimation函数未找到');
+                    }
+
+                    // 启动灵动视频循环播放
+                    console.log('图片生成完成，启动灵动视频循环播放');
+                    if (typeof resetIdleTimer === 'function') {
+                        try {
+                            resetIdleTimer();
+                            console.log('灵动视频循环播放已启动');
+                        } catch (e) {
+                            console.error('启动灵动视频循环播放失败:', e);
+                        }
+                    } else {
+                        console.warn('resetIdleTimer函数未找到');
+                    }
+
                     // 恢复按钮状态
                     button.disabled = false;
                     button.innerHTML = originalButtonText;
@@ -764,25 +1053,55 @@
 
         function generateImageToImage() {
             const prompt = document.getElementById('image-prompt').value;
-            const imageUrl = document.getElementById('reference-image').value;
+            const imageUrlInput = document.getElementById('reference-image');
+            const imageUrl = (window.refState && window.refState.url) || (imageUrlInput ? imageUrlInput.value : '');
             const size = document.getElementById('image-size').value;
             const watermark = document.getElementById('image-watermark').checked;
             const button = document.getElementById('image-button');
             const originalButtonText = button.innerHTML;
 
             if (!prompt) {
+                // 播放警告动画
+                if (typeof playWarningAnimation === 'function') {
+                    playWarningAnimation();
+                }
                 showResult('image-result', '请输入图片描述', 'error');
                 return;
             }
 
             if (!imageUrl) {
-                showResult('image-result', '请输入参考图片URL', 'error');
+                // 播放警告动画
+                if (typeof playWarningAnimation === 'function') {
+                    playWarningAnimation();
+                }
+                showResult('image-result', '请上传参考图片或填写URL', 'error');
                 return;
+            }
+
+            // 停止警告动画，开始正常的角色动画
+            if (typeof stopCharacterAnimation === 'function') {
+                stopCharacterAnimation();
+            }
+            if (typeof playCharacterAnimation === 'function') {
+                playCharacterAnimation();
             }
 
             // 显示加载状态
             button.disabled = true;
             button.innerHTML = '<div class="loading"></div> <span>生成中...</span>';
+
+            // 开始循环播放角色动画
+            console.log('开始图生图，启动角色动画循环播放');
+            if (typeof playCharacterAnimation === 'function') {
+                try {
+                    playCharacterAnimation(true); // 传入true启用循环播放
+                    console.log('角色动画已启动');
+                } catch (e) {
+                    console.error('启动角色动画失败:', e);
+                }
+            } else {
+                console.warn('playCharacterAnimation函数未找到');
+            }
 
             showResult('image-result', '正在生成图片，请稍候...', 'info');
 
@@ -810,6 +1129,32 @@
                     showResult('image-result', '请求失败: ' + error.message, 'error');
                 })
                 .finally(() => {
+                    // 停止角色动画播放
+                    console.log('图生图完成，停止角色动画');
+                    if (typeof stopCharacterAnimation === 'function') {
+                        try {
+                            stopCharacterAnimation();
+                            console.log('角色动画已停止');
+                        } catch (e) {
+                            console.error('停止角色动画失败:', e);
+                        }
+                    } else {
+                        console.warn('stopCharacterAnimation函数未找到');
+                    }
+
+                    // 启动灵动视频循环播放
+                    console.log('图生图完成，启动灵动视频循环播放');
+                    if (typeof resetIdleTimer === 'function') {
+                        try {
+                            resetIdleTimer();
+                            console.log('灵动视频循环播放已启动');
+                        } catch (e) {
+                            console.error('启动灵动视频循环播放失败:', e);
+                        }
+                    } else {
+                        console.warn('resetIdleTimer函数未找到');
+                    }
+
                     // 恢复按钮状态
                     button.disabled = false;
                     button.innerHTML = originalButtonText;
@@ -831,6 +1176,79 @@
             `;
         }
 
+        // 历史记录加载与渲染（支持滚动加载）
+        const historyState = { loaded: 0, pageSize: 40, loading: false, allLoaded: false };
+
+        function loadHistory(reset = true) {
+            const grid = document.getElementById('history-grid');
+            const resultEl = document.getElementById('history-result');
+
+            if (reset) {
+                historyState.loaded = 0;
+                historyState.allLoaded = false;
+                if (grid) grid.innerHTML = '';
+            }
+            if (resultEl) resultEl.innerHTML = '<div class="message info">正在加载历史记录...</div>';
+
+            const limit = historyState.loaded + historyState.pageSize;
+            historyState.loading = true;
+            fetch('/api/history?limit=' + limit)
+                .then(res => res.json())
+                .then(data => {
+                    if (!data.success) throw new Error(data.error || '加载失败');
+                    const items = data.items || [];
+                    const append = items.slice(historyState.loaded);
+                    renderHistory(append, /*append*/ true);
+                    historyState.loaded = items.length;
+                    historyState.allLoaded = items.length < limit;
+                    if (resultEl) resultEl.innerHTML = historyState.allLoaded ? '<div class="message info">已全部加载</div>' : '';
+                })
+                .catch(err => {
+                    if (resultEl) resultEl.innerHTML = '<div class="message error">' + (err.message || '加载失败') + '</div>';
+                })
+                .finally(() => {
+                    historyState.loading = false;
+                });
+        }
+        function renderHistory(items, append = false) {
+            const grid = document.getElementById('history-grid');
+            if (!grid) return;
+            if (!items.length && !append) {
+                grid.innerHTML = '<div class="message info" style="grid-column:1/-1;">暂无历史记录</div>';
+                return;
+            }
+            const html = items.map(it => {
+                const title = (it.prompt || '').slice(0, 36);
+                const url = it.image_url || '';
+                const mode = it.mode === 'image_to_image' ? '图生图' : '文生图';
+                const time = (it.created_at || '').replace('T', ' ').slice(0, 19);
+                return `
+                    <div class="thumb-item" title="${mode} · ${time}">
+                        <a href="${url}" target="_blank" rel="noopener noreferrer">
+                            <img src="${url}" alt="历史生成图"/>
+                        </a>
+                        <span class="thumb-name">${mode} · ${title}</span>
+                    </div>
+                `;
+            }).join('');
+            if (append) {
+                grid.insertAdjacentHTML('beforeend', html);
+            } else {
+                grid.innerHTML = html;
+            }
+        }
+
+        // 监听窗口滚动，靠近底部自动加载更多
+        window.addEventListener('scroll', () => {
+            const historyTab = document.getElementById('history');
+            const isActive = historyTab && historyTab.classList.contains('active');
+            if (!isActive || historyState.loading || historyState.allLoaded) return;
+            const nearBottom = (window.innerHeight + window.scrollY) >= (document.body.offsetHeight - 240);
+            if (nearBottom) {
+                loadHistory(false);
+            }
+        });
+
         function generateBestImageSelection() {
             const input = document.getElementById('bulk-images');
             const files = Array.from(input.files);
@@ -838,8 +1256,20 @@
             const originalButtonText = button.innerHTML;
 
             if (!files.length) {
+                // 播放警告动画
+                if (typeof playWarningAnimation === 'function') {
+                    playWarningAnimation();
+                }
                 showResult('bulk-result', '请至少选择一张图片', 'error');
                 return;
+            }
+
+            // 停止警告动画，开始正常的角色动画
+            if (typeof stopCharacterAnimation === 'function') {
+                stopCharacterAnimation();
+            }
+            if (typeof playCharacterAnimation === 'function') {
+                playCharacterAnimation();
             }
 
             button.disabled = true;
@@ -879,6 +1309,19 @@
                     showResult('bulk-result', '请求失败: ' + err.message, 'error');
                 })
                 .finally(() => {
+                    // 启动灵动视频循环播放
+                    console.log('批量图片优选完成，启动灵动视频循环播放');
+                    if (typeof resetIdleTimer === 'function') {
+                        try {
+                            resetIdleTimer();
+                            console.log('灵动视频循环播放已启动');
+                        } catch (e) {
+                            console.error('启动灵动视频循环播放失败:', e);
+                        }
+                    } else {
+                        console.warn('resetIdleTimer函数未找到');
+                    }
+
                     button.disabled = false;
                     button.innerHTML = originalButtonText;
                 });
@@ -906,58 +1349,706 @@
                 reader.readAsDataURL(file);
             }
         }
-    </script>
-<script>
-      (function(){
-        const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-        const buttons = document.querySelectorAll('button');
-        buttons.forEach(btn => {
-           const onMove = (e) => {
-             const rect = btn.getBoundingClientRect();
-             const x = e.clientX - rect.left;
-             const y = e.clientY - rect.top;
-             btn.style.setProperty('--mouse-x', x + 'px');
-             btn.style.setProperty('--mouse-y', y + 'px');
-             btn.style.setProperty('--glow-alpha', '1');
-           };
-           btn.addEventListener('mousemove', onMove);
-           btn.addEventListener('mouseleave', () => {
-             btn.style.setProperty('--glow-alpha', '0');
-           });
-           btn.addEventListener('mousedown', (e) => {
-             if (prefersReduced) return;
-             const rect = btn.getBoundingClientRect();
-             const x = e.clientX - rect.left;
-             const y = e.clientY - rect.top;
-             const ripple = document.createElement('span');
-             ripple.className = 'ripple';
-             ripple.style.left = (x - 6) + 'px';
-             ripple.style.top = (y - 6) + 'px';
-             btn.appendChild(ripple);
-             ripple.addEventListener('animationend', () => ripple.remove());
-           });
-         });
 
-         // 背景板（容器）点击涟漪
-         const container = document.querySelector('.container');
-         if (container) {
-           container.addEventListener('mousedown', (e) => {
-             if (prefersReduced) return;
-             // 避免与按钮/输入/标签等交互重复涟漪
-             if (e.target && e.target.closest('button, a, input, textarea, select, label, .tab')) return;
-             const rect = container.getBoundingClientRect();
-             const x = e.clientX - rect.left;
-             const y = e.clientY - rect.top;
-             const ripple = document.createElement('span');
-             ripple.className = 'ripple ripple-bg';
-             ripple.style.left = (x - 8) + 'px';
-             ripple.style.top = (y - 8) + 'px';
-             container.appendChild(ripple);
-             ripple.addEventListener('animationend', () => ripple.remove());
-           });
-         }
-       })();
-     </script>
-    </body>
+        // 参考图上传拖拽与预览
+        const refState = { url: '', uploading: false };
+
+        function handleRefFileSelect(e) {
+            const file = e.target.files && e.target.files[0];
+            if (!file) return;
+            uploadRefFile(file);
+        }
+
+        function initRefUploadDnD() {
+            const area = document.getElementById('ref-upload-area');
+            if (!area) return;
+            area.addEventListener('dragover', (ev) => {
+                ev.preventDefault();
+                area.classList.add('dragover');
+            });
+            area.addEventListener('dragleave', () => area.classList.remove('dragover'));
+            area.addEventListener('drop', (ev) => {
+                ev.preventDefault();
+                area.classList.remove('dragover');
+                const files = ev.dataTransfer && ev.dataTransfer.files;
+                if (files && files.length) {
+                    uploadRefFile(files[0]);
+                }
+            });
+        }
+
+        function uploadRefFile(file) {
+            if (!file) return;
+            const resultEl = document.getElementById('ref-upload-result');
+            const urlInput = document.getElementById('reference-image');
+            const preview = document.getElementById('ref-preview');
+            const formData = new FormData();
+            formData.append('file', file);
+            refState.uploading = true;
+            if (resultEl) resultEl.innerHTML = '<div class="message info">正在上传参考图片...</div>';
+            fetch('/api/upload', { method: 'POST', body: formData })
+                .then(res => res.json())
+                .then(data => {
+                    if (data && data.success && data.url) {
+                        refState.url = data.url;
+                        if (urlInput) urlInput.value = data.url;
+                        if (preview) {
+                            preview.innerHTML = `
+                                <div class="thumb-item">
+                                    <img src="${data.url}" alt="${file.name}">
+                                    <span class="thumb-name">${file.name}</span>
+                                </div>
+                            `;
+                        }
+                        if (resultEl) resultEl.innerHTML = '<div class="message success">上传成功，已填充参考图片URL</div>';
+                    } else {
+                        throw new Error((data && data.error) || '上传失败');
+                    }
+                })
+                .catch(err => {
+                    console.error('上传失败:', err);
+                    if (resultEl) resultEl.innerHTML = '<div class="message error">上传失败：' + (err.message || err) + '</div>';
+                })
+                .finally(() => {
+                    refState.uploading = false;
+                });
+        }
+
+        // 初始化拖拽区域
+        initRefUploadDnD();
+    </script>
+
+    <script>
+        // 角色视频去黑背景渲染
+        (function () {
+            const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+            const stage = document.querySelector('.character-stage');
+            const canvas = document.getElementById('character-canvas');
+            const ctx = canvas ? canvas.getContext('2d') : null;
+            const video = document.getElementById('character-video');
+            const offscreen = document.createElement('canvas');
+            const offCtx = offscreen.getContext('2d');
+            let rafId = null;
+            let natW = 0, natH = 0; // 视频原始尺寸
+
+            function resizeStage() {
+                if (!stage || !canvas) return;
+                const rect = stage.getBoundingClientRect();
+                const stageW = Math.max(1, Math.floor(rect.width));
+                // 根据视频比例自适应高度（限制在 200-380）
+                const ratio = (natW > 0 && natH > 0) ? (natH / natW) : (9 / 16);
+                const targetH = Math.max(200, Math.min(380, Math.round(stageW * ratio)));
+                stage.style.height = targetH + 'px';
+                canvas.width = stageW;
+                canvas.height = targetH;
+                offscreen.width = canvas.width;
+                offscreen.height = canvas.height;
+            }
+
+            window.addEventListener('resize', resizeStage);
+            // 初始化一次
+            resizeStage();
+
+            // 初始化视频源
+            if (video) {
+                video.src = '/video/' + encodeURIComponent('思考.mp4');
+                video.addEventListener('loadedmetadata', () => {
+                    natW = Math.max(1, video.videoWidth || natW);
+                    natH = Math.max(1, video.videoHeight || natH);
+                    resizeStage();
+                });
+            }
+
+            function renderFrame() {
+                if (!ctx || !offCtx || !video || video.paused || video.ended) { rafId = null; return; }
+                try {
+                    const cw = offscreen.width, ch = offscreen.height;
+                    offCtx.clearRect(0, 0, cw, ch);
+                    // 等比缩放居中绘制，避免被拉伸
+                    const vw = Math.max(1, video.videoWidth || natW || cw);
+                    const vh = Math.max(1, video.videoHeight || natH || ch);
+                    const scale = Math.min(cw / vw, ch / vh);
+                    const dw = Math.floor(vw * scale);
+                    const dh = Math.floor(vh * scale);
+                    const dx = Math.floor((cw - dw) / 2);
+                    const dy = Math.floor((ch - dh) / 2);
+                    offCtx.drawImage(video, dx, dy, dw, dh);
+
+                    // 直接绘制原始视频内容，不进行背景处理
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    ctx.drawImage(offscreen, 0, 0, canvas.width, canvas.height);
+                } catch (err) {
+                    // 忽略单帧错误，继续下一帧
+                }
+                rafId = requestAnimationFrame(renderFrame);
+            }
+
+            // 对外暴露播放函数
+            window.playCharacterAnimation = function (loop = false) {
+                console.log('playCharacterAnimation被调用，loop参数:', loop);
+                if (!video || !canvas || prefersReduced) {
+                    console.warn('播放条件不满足 - video:', !!video, 'canvas:', !!canvas, 'prefersReduced:', prefersReduced);
+                    return;
+                }
+
+                // 确保视频源已设置
+                if (!video.src) {
+                    console.warn('视频源未设置');
+                    return;
+                }
+
+                // 若已获知元数据，先按比例更新舞台尺寸
+                if (video.videoWidth && video.videoHeight) {
+                    natW = video.videoWidth;
+                    natH = video.videoHeight;
+                }
+                resizeStage();
+                // 设置循环播放
+                video.loop = loop;
+                console.log('设置视频循环播放:', loop);
+                // 从头播放
+                video.currentTime = 0;
+
+                // 立即开始播放，不等待加载完成
+                console.log('立即开始播放视频');
+                try {
+                    const playPromise = video.play();
+                    if (playPromise !== undefined) {
+                        playPromise.then(() => {
+                            console.log('视频播放成功');
+                            if (!rafId) rafId = requestAnimationFrame(renderFrame);
+                        }).catch((err) => {
+                            console.error('视频播放失败:', err);
+
+                            // 处理 AbortError 和其他播放错误
+                            if (err.name === 'AbortError' || err.message.includes('interrupted')) {
+                                console.log('角色视频播放被中断，尝试重新播放');
+                                setTimeout(() => {
+                                    if (video && !video.paused) return; // 如果已经在播放则不重试
+                                    video.play().catch(retryErr => {
+                                        console.warn('角色视频重试播放失败:', retryErr);
+                                    });
+                                }, 500);
+                            }
+                        });
+                    }
+                } catch (e) {
+                    console.error('播放异常:', e);
+                }
+            };
+
+            // 对外暴露停止播放函数
+            window.stopCharacterAnimation = function () {
+                console.log('stopCharacterAnimation被调用');
+                if (!video) {
+                    console.warn('视频元素不存在');
+                    return;
+                }
+                try {
+                    video.pause();
+                    video.currentTime = 0;
+                    console.log('视频已暂停并重置');
+                    if (rafId) {
+                        cancelAnimationFrame(rafId);
+                        rafId = null;
+                        console.log('动画帧已取消');
+                    }
+                    // 清空画布
+                    if (ctx && canvas) {
+                        ctx.clearRect(0, 0, canvas.width, canvas.height);
+                        console.log('画布已清空');
+                    }
+                } catch (e) {
+                    console.error('停止动画异常:', e);
+                }
+            };
+
+            // 警告动画播放函数
+            window.playWarningAnimation = function () {
+                console.log('playWarningAnimation被调用');
+                const warningVideo = document.getElementById('warning-video');
+                console.log('警告视频元素:', warningVideo);
+                const localPrefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+                console.log('prefersReduced:', localPrefersReduced, 'canvas:', !!canvas);
+
+                if (!warningVideo) {
+                    console.error('警告视频元素未找到');
+                    return;
+                }
+
+                // 设置警告视频源
+                if (!warningVideo.src) {
+                    warningVideo.src = '/video/' + encodeURIComponent('警告.mp4');
+                }
+
+                if (!canvas) {
+                    console.error('画布元素未找到');
+                    return;
+                }
+
+                if (localPrefersReduced) {
+                    console.warn('用户偏好减少动画，跳过警告动画');
+                    return;
+                }
+
+                // 停止当前播放的角色动画
+                if (typeof stopCharacterAnimation === 'function') {
+                    console.log('停止角色动画');
+                    stopCharacterAnimation();
+                }
+
+                // 确保警告视频源已设置
+                console.log('警告视频src:', warningVideo.src);
+                if (!warningVideo.src) {
+                    console.error('警告视频源未设置');
+                    return;
+                }
+
+                // 设置不循环播放
+                warningVideo.loop = false;
+                console.log('设置警告视频不循环播放');
+
+                // 从头播放
+                warningVideo.currentTime = 0;
+                console.log('重置视频播放时间到0');
+
+                // 立即开始播放警告动画
+                console.log('开始播放警告视频');
+                try {
+                    const playPromise = warningVideo.play();
+                    if (playPromise !== undefined) {
+                        playPromise.then(() => {
+                            console.log('警告视频播放成功');
+                            // 使用警告视频渲染到画布
+                            renderWarningFrame(warningVideo);
+                        }).catch((err) => {
+                            console.error('警告视频播放失败:', err);
+
+                            // 处理 AbortError 和其他播放错误
+                            if (err.name === 'AbortError' || err.message.includes('interrupted')) {
+                                console.log('警告视频播放被中断，尝试重新播放');
+                                setTimeout(() => {
+                                    if (warningVideo && !warningVideo.paused) return; // 如果已经在播放则不重试
+                                    warningVideo.play().catch(retryErr => {
+                                        console.warn('警告视频重试播放失败:', retryErr);
+                                    });
+                                }, 500);
+                            }
+                        });
+                    } else {
+                        console.log('视频播放没有返回Promise，直接开始渲染');
+                        renderWarningFrame(warningVideo);
+                    }
+                } catch (e) {
+                    console.error('警告播放异常:', e);
+                }
+            };
+
+            // 警告动画渲染函数
+            function renderWarningFrame(warningVideo) {
+                if (!ctx || !offCtx || !warningVideo || warningVideo.paused || warningVideo.ended) {
+                    console.log('警告动画渲染结束');
+                    return;
+                }
+                try {
+                    const cw = offscreen.width, ch = offscreen.height;
+                    offCtx.clearRect(0, 0, cw, ch);
+                    // 等比缩放居中绘制，避免被拉伸
+                    const vw = Math.max(1, warningVideo.videoWidth || cw);
+                    const vh = Math.max(1, warningVideo.videoHeight || ch);
+                    const scale = Math.min(cw / vw, ch / vh);
+                    const dw = Math.floor(vw * scale);
+                    const dh = Math.floor(vh * scale);
+                    const dx = Math.floor((cw - dw) / 2);
+                    const dy = Math.floor((ch - dh) / 2);
+                    offCtx.drawImage(warningVideo, dx, dy, dw, dh);
+
+                    // 直接绘制原始视频内容，不进行背景处理
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    ctx.drawImage(offscreen, 0, 0, canvas.width, canvas.height);
+                } catch (err) {
+                    // 忽略单帧错误，继续下一帧
+                }
+                requestAnimationFrame(() => renderWarningFrame(warningVideo));
+            }
+        })();
+    </script>
+
+    <script>
+        (function () {
+            const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+            const buttons = document.querySelectorAll('button');
+            buttons.forEach(btn => {
+                const onMove = (e) => {
+                    const rect = btn.getBoundingClientRect();
+                    const x = e.clientX - rect.left;
+                    const y = e.clientY - rect.top;
+                    btn.style.setProperty('--mouse-x', x + 'px');
+                    btn.style.setProperty('--mouse-y', y + 'px');
+                    btn.style.setProperty('--glow-alpha', '1');
+                };
+                btn.addEventListener('mousemove', onMove);
+                btn.addEventListener('mouseleave', () => {
+                    btn.style.setProperty('--glow-alpha', '0');
+                });
+                btn.addEventListener('mousedown', (e) => {
+                    if (prefersReduced) return;
+                    const rect = btn.getBoundingClientRect();
+                    const x = e.clientX - rect.left;
+                    const y = e.clientY - rect.top;
+                    const ripple = document.createElement('span');
+                    ripple.className = 'ripple';
+                    ripple.style.left = (x - 6) + 'px';
+                    ripple.style.top = (y - 6) + 'px';
+                    btn.appendChild(ripple);
+                    ripple.addEventListener('animationend', () => ripple.remove());
+                });
+            });
+
+            // 背景板（容器）点击涟漪
+            const container = document.querySelector('.container');
+            if (container) {
+                container.addEventListener('mousedown', (e) => {
+                    if (prefersReduced) return;
+                    // 避免与按钮/输入/标签等交互重复涟漪
+                    if (e.target && e.target.closest('button, a, input, textarea, select, label, .tab')) return;
+                    const rect = container.getBoundingClientRect();
+                    const x = e.clientX - rect.left;
+                    const y = e.clientY - rect.top;
+                    const ripple = document.createElement('span');
+                    ripple.className = 'ripple ripple-bg';
+                    ripple.style.left = (x - 8) + 'px';
+                    ripple.style.top = (y - 8) + 'px';
+                    container.appendChild(ripple);
+                    ripple.addEventListener('animationend', () => ripple.remove());
+                });
+            }
+        })();
+    </script>
+
+    <!-- 灵动视频空闲播放系统 -->
+    <script>
+        (function () {
+            const actionVideos = [
+                document.getElementById('action-video-1'),
+                document.getElementById('action-video-2'),
+                document.getElementById('action-video-3'),
+                document.getElementById('action-video-4')
+            ];
+
+            // 初始化灵动视频源
+            const actionVideoFiles = ['灵动1.mp4', '灵动2.mp4', '灵动3.mp4', '灵动4.mp4'];
+            actionVideos.forEach((video, index) => {
+                if (video && actionVideoFiles[index]) {
+                    video.src = '/video/' + encodeURIComponent(actionVideoFiles[index]);
+
+                    // 添加错误处理
+                    video.addEventListener('error', (e) => {
+                        console.error(`灵动视频加载失败: ${video.src}`, e);
+                    });
+
+                    video.addEventListener('loadstart', () => {
+                        console.log(`开始加载灵动视频: ${video.src}`);
+                    });
+
+                    video.addEventListener('canplay', () => {
+                        console.log(`灵动视频可以播放: ${video.src}`);
+                    });
+                }
+            });
+
+            let idleTimer = null;
+            let isIdle = false;
+            let currentActionVideo = null;
+            let actionRafId = null;
+            let isPlayingAction = false;
+
+            const IDLE_TIMEOUT = 5000; // 5秒无操作后开始播放灵动视频
+
+            // 获取画布和上下文
+            const canvas = document.getElementById('character-canvas');
+            const ctx = canvas ? canvas.getContext('2d') : null;
+            const offscreen = document.createElement('canvas');
+            const offCtx = offscreen.getContext('2d');
+
+            // 为所有角色动作视频添加元数据加载监听器
+            actionVideos.forEach(video => {
+                if (video) {
+                    video.addEventListener('loadedmetadata', () => {
+                        console.log(`角色动作视频元数据已加载: ${video.src}, 尺寸: ${video.videoWidth}x${video.videoHeight}`);
+                        // 确保画布尺寸与当前视频匹配
+                        updateActionCanvasSize();
+                    });
+                }
+            });
+
+            // 更新角色动作视频画布尺寸
+            function updateActionCanvasSize() {
+                if (!canvas || !currentActionVideo) return;
+
+                const stage = document.querySelector('.character-stage');
+                if (!stage) return;
+
+                const rect = stage.getBoundingClientRect();
+                const stageW = Math.max(1, Math.floor(rect.width));
+
+                // 使用当前动作视频的真实比例
+                const videoW = Math.max(1, currentActionVideo.videoWidth || stageW);
+                const videoH = Math.max(1, currentActionVideo.videoHeight || Math.round(stageW * 9 / 16));
+                const ratio = videoH / videoW;
+                const targetH = Math.max(200, Math.min(380, Math.round(stageW * ratio)));
+
+                stage.style.height = targetH + 'px';
+                canvas.width = stageW;
+                canvas.height = targetH;
+                offscreen.width = canvas.width;
+                offscreen.height = canvas.height;
+
+                console.log(`角色动作画布尺寸已更新: ${canvas.width}x${canvas.height}, 视频比例: ${ratio.toFixed(3)}`);
+            }
+
+            // 用户活动事件列表
+            const userEvents = ['mousedown', 'mousemove', 'keydown', 'scroll', 'touchstart', 'click'];
+
+            // 重置空闲计时器
+            function resetIdleTimer() {
+                if (idleTimer) {
+                    clearTimeout(idleTimer);
+                }
+
+                // 如果当前正在播放灵动视频，停止它
+                if (isIdle && isPlayingAction) {
+                    stopActionVideo();
+                }
+
+                isIdle = false;
+
+                idleTimer = setTimeout(() => {
+                    isIdle = true;
+                    // 检查是否有其他视频在播放
+                    const characterVideo = document.getElementById('character-video');
+                    const warningVideo = document.getElementById('warning-video');
+
+                    if ((!characterVideo || characterVideo.paused) &&
+                        (!warningVideo || warningVideo.paused)) {
+                        startRandomActionVideo();
+                    }
+                }, IDLE_TIMEOUT);
+            }
+
+            // 开始播放随机灵动视频
+            function startRandomActionVideo() {
+                if (!isIdle || isPlayingAction) return;
+
+                // 随机选择一个灵动视频
+                const randomIndex = Math.floor(Math.random() * actionVideos.length);
+                currentActionVideo = actionVideos[randomIndex];
+
+                if (!currentActionVideo || !canvas || !ctx) {
+                    console.warn('灵动视频或画布元素不可用');
+                    return;
+                }
+
+                // 检查视频是否已经加载
+                if (!currentActionVideo.src) {
+                    console.error('灵动视频源未设置:', currentActionVideo);
+                    return;
+                }
+
+                console.log('开始播放灵动视频:', currentActionVideo.src);
+                isPlayingAction = true;
+
+                // 更新画布尺寸以匹配当前视频
+                updateActionCanvasSize();
+
+                // 设置视频不循环，播放完后自动选择下一个
+                currentActionVideo.loop = false;
+                currentActionVideo.currentTime = 0;
+
+                // 监听视频结束事件
+                currentActionVideo.addEventListener('ended', onActionVideoEnded);
+
+                try {
+                    const playPromise = currentActionVideo.play();
+                    if (playPromise !== undefined) {
+                        playPromise.then(() => {
+                            console.log('灵动视频播放成功');
+                            if (!actionRafId) {
+                                actionRafId = requestAnimationFrame(renderActionFrame);
+                            }
+                        }).catch((err) => {
+                            console.error('灵动视频播放失败:', err);
+
+                            // 处理 AbortError 和其他播放错误
+                            if (err.name === 'AbortError' || err.message.includes('interrupted')) {
+                                console.log('视频播放被中断，尝试重新播放');
+                                // 延迟重试播放
+                                setTimeout(() => {
+                                    if (isIdle && currentActionVideo) {
+                                        console.log('重新尝试播放灵动视频');
+                                        currentActionVideo.play().catch(retryErr => {
+                                            console.warn('重试播放失败:', retryErr);
+                                            isPlayingAction = false;
+                                            // 如果重试失败，尝试播放下一个视频
+                                            setTimeout(() => {
+                                                if (isIdle) {
+                                                    startRandomActionVideo();
+                                                }
+                                            }, 1000);
+                                        });
+                                    }
+                                }, 500);
+                            } else {
+                                isPlayingAction = false;
+                                // 其他错误，尝试播放下一个视频
+                                setTimeout(() => {
+                                    if (isIdle) {
+                                        startRandomActionVideo();
+                                    }
+                                }, 1000);
+                            }
+                        });
+                    }
+                } catch (e) {
+                    console.error('灵动视频播放异常:', e);
+                    isPlayingAction = false;
+                }
+            }
+
+            // 灵动视频结束处理
+            function onActionVideoEnded() {
+                console.log('灵动视频播放结束');
+                if (currentActionVideo) {
+                    currentActionVideo.removeEventListener('ended', onActionVideoEnded);
+                }
+
+                if (actionRafId) {
+                    cancelAnimationFrame(actionRafId);
+                    actionRafId = null;
+                }
+
+                isPlayingAction = false;
+                currentActionVideo = null;
+
+                // 如果仍然空闲，继续播放下一个随机视频
+                if (isIdle) {
+                    setTimeout(() => {
+                        startRandomActionVideo();
+                    }, 1000); // 1秒间隔后播放下一个
+                }
+            }
+
+            // 停止灵动视频播放
+            function stopActionVideo() {
+                if (currentActionVideo) {
+                    console.log('停止灵动视频播放');
+                    currentActionVideo.pause();
+                    currentActionVideo.currentTime = 0;
+                    currentActionVideo.removeEventListener('ended', onActionVideoEnded);
+                    currentActionVideo = null;
+                }
+
+                if (actionRafId) {
+                    cancelAnimationFrame(actionRafId);
+                    actionRafId = null;
+                }
+
+                isPlayingAction = false;
+
+                // 清空画布
+                if (ctx && canvas) {
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                }
+            }
+
+            // 渲染灵动视频帧
+            function renderActionFrame() {
+                if (!ctx || !offCtx || !currentActionVideo ||
+                    currentActionVideo.paused || currentActionVideo.ended || !isPlayingAction) {
+                    actionRafId = null;
+                    return;
+                }
+
+                try {
+                    const cw = offscreen.width, ch = offscreen.height;
+                    offCtx.clearRect(0, 0, cw, ch);
+
+                    // 确保视频元数据已加载
+                    if (currentActionVideo.readyState < 2) {
+                        actionRafId = requestAnimationFrame(renderActionFrame);
+                        return;
+                    }
+
+                    // 等比缩放居中绘制，与renderFrame保持一致
+                    const vw = Math.max(1, currentActionVideo.videoWidth || cw);
+                    const vh = Math.max(1, currentActionVideo.videoHeight || ch);
+                    const scale = Math.min(cw / vw, ch / vh);
+                    const dw = Math.floor(vw * scale);
+                    const dh = Math.floor(vh * scale);
+                    const dx = Math.floor((cw - dw) / 2);
+                    const dy = Math.floor((ch - dh) / 2);
+
+                    // 使用高质量渲染
+                    offCtx.imageSmoothingEnabled = true;
+                    offCtx.imageSmoothingQuality = 'high';
+                    offCtx.drawImage(currentActionVideo, dx, dy, dw, dh);
+
+                    // 绘制到主画布，保持高质量
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    ctx.imageSmoothingEnabled = true;
+                    ctx.imageSmoothingQuality = 'high';
+                    ctx.drawImage(offscreen, 0, 0, canvas.width, canvas.height);
+                } catch (err) {
+                    console.warn('角色动作视频渲染错误:', err);
+                }
+
+                actionRafId = requestAnimationFrame(renderActionFrame);
+            }
+
+            // 监听用户活动事件
+            userEvents.forEach(eventType => {
+                document.addEventListener(eventType, resetIdleTimer, true);
+            });
+
+            // 页面加载完成后开始计时
+            window.addEventListener('load', () => {
+                resetIdleTimer();
+            });
+
+            // 修改现有的播放函数，确保停止灵动视频
+            const originalPlayCharacterAnimation = window.playCharacterAnimation;
+            const originalPlayWarningAnimation = window.playWarningAnimation;
+
+            window.playCharacterAnimation = function (loop = false) {
+                // 停止灵动视频
+                if (isPlayingAction) {
+                    stopActionVideo();
+                }
+                // 重置空闲状态
+                resetIdleTimer();
+                // 调用原始函数
+                if (originalPlayCharacterAnimation) {
+                    return originalPlayCharacterAnimation.call(this, loop);
+                }
+            };
+
+            window.playWarningAnimation = function () {
+                // 停止灵动视频
+                if (isPlayingAction) {
+                    stopActionVideo();
+                }
+                // 重置空闲状态
+                resetIdleTimer();
+                // 调用原始函数
+                if (originalPlayWarningAnimation) {
+                    return originalPlayWarningAnimation.call(this);
+                }
+            };
+
+            // 对外暴露停止灵动视频的函数
+            window.stopActionVideo = stopActionVideo;
+        })();
+    </script>
+</body>
 
 </html>
