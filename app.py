@@ -95,6 +95,8 @@ def safe_generate_image(prompt, **kwargs):
             return {'success': False, 'error': 'API配额不足'}
         elif "rate limit" in error_msg.lower():
             return {'success': False, 'error': '请求频率过高，请稍后重试'}
+        elif "OversizeImage" in error_msg or "oversize" in error_msg.lower():
+            return {'success': False, 'error': '参考图过大（超过10MB）。请更换更小图片，或使用本地上传以自动压缩'}
         else:
             return {'success': False, 'error': f'生成失败: {error_msg}'}
 
@@ -179,7 +181,15 @@ def upload_image():
         f.save(path)
         # 返回可访问URL（相对路径即可）
         url = f"/uploads/{filename}"
-        return jsonify({'success': True, 'url': url, 'filename': filename})
+        # 尺寸提示（不拒绝上传），避免后续生成因参考图过大失败
+        try:
+            size_bytes = os.path.getsize(path)
+        except Exception:
+            size_bytes = 0
+        resp = {'success': True, 'url': url, 'filename': filename}
+        if size_bytes > (10 * 1024 * 1024):
+            resp['warning'] = '图片较大（>10MB），生成时将自动压缩以避免失败'
+        return jsonify(resp)
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)}), 500
 
@@ -271,17 +281,47 @@ def image_to_image():
                     path = os.path.join(UPLOAD_DIR, filename)
                     if not os.path.exists(path):
                         return jsonify({'success': False, 'error': '本地参考图不存在，请重新上传或填写公网URL'}), 400
-                    # 推测 MIME 类型
-                    lower = filename.lower()
-                    mime = 'image/jpeg'
-                    if lower.endswith('.png'):
-                        mime = 'image/png'
-                    elif lower.endswith('.webp'):
-                        mime = 'image/webp'
-                    # 读文件并转为 data URL
-                    with open(path, 'rb') as f:
-                        b64 = base64.b64encode(f.read()).decode('ascii')
-                    source_image = f"data:{mime};base64,{b64}"
+                    # 若文件超过 10MB，自动压缩为 JPEG 并编码为 data URL
+                    try:
+                        size_bytes = os.path.getsize(path)
+                    except Exception:
+                        size_bytes = 0
+                    if size_bytes > (10 * 1024 * 1024):
+                        try:
+                            img = Image.open(path)
+                            # 去除透明通道并限制尺寸
+                            if img.mode not in ('RGB', 'L'):
+                                img = img.convert('RGB')
+                            max_dim = 2048
+                            w, h = img.size
+                            if max(w, h) > max_dim:
+                                img = img.copy()
+                                img.thumbnail((max_dim, max_dim), Image.LANCZOS)
+                            # 逐步降低质量直到 <=10MB
+                            for q in (85, 75, 65, 55, 45, 35):
+                                buf = io.BytesIO()
+                                img.save(buf, format='JPEG', quality=q, optimize=True)
+                                data = buf.getvalue()
+                                if len(data) <= (10 * 1024 * 1024) or q == 35:
+                                    b64 = base64.b64encode(data).decode('ascii')
+                                    source_image = f"data:image/jpeg;base64,{b64}"
+                                    break
+                        except Exception:
+                            # 压缩失败则回退到原始编码
+                            with open(path, 'rb') as f:
+                                b64 = base64.b64encode(f.read()).decode('ascii')
+                            source_image = f"data:image/jpeg;base64,{b64}"
+                    else:
+                        # 推测 MIME 类型，直接按原格式编码
+                        lower = filename.lower()
+                        mime = 'image/jpeg'
+                        if lower.endswith('.png'):
+                            mime = 'image/png'
+                        elif lower.endswith('.webp'):
+                            mime = 'image/webp'
+                        with open(path, 'rb') as f:
+                            b64 = base64.b64encode(f.read()).decode('ascii')
+                        source_image = f"data:{mime};base64,{b64}"
         except Exception as _e:
             # 读取或编码失败，维持原始 URL，交由后续调用报错
             source_image = image_url
