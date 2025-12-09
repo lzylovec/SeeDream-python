@@ -11,6 +11,7 @@ import uuid
 from datetime import datetime
 from werkzeug.utils import secure_filename
 from openai import OpenAI
+import pymysql
 
 # 加载环境变量
 load_dotenv()
@@ -27,6 +28,62 @@ ms_client = OpenAI(
     base_url=os.environ.get("MS_BASE_URL"),
     api_key=os.environ.get("MS_API_KEY"),
 )
+
+DB_HOST = os.environ.get("DB_HOST", "127.0.0.1")
+DB_PORT = int(os.environ.get("DB_PORT", "3306"))
+DB_USER = os.environ.get("DB_USER", "root")
+DB_PASSWORD = os.environ.get("DB_PASSWORD", "")
+DB_NAME = os.environ.get("DB_NAME", "seedream")
+DB_READY = False
+
+def _db_connect(db: str | None = None):
+    return pymysql.connect(
+        host=DB_HOST,
+        port=DB_PORT,
+        user=DB_USER,
+        password=DB_PASSWORD,
+        database=(db or DB_NAME),
+        charset="utf8mb4",
+        autocommit=True,
+    )
+
+def _db_init():
+    global DB_READY
+    try:
+        conn = _db_connect(None)
+    except Exception:
+        try:
+            conn = pymysql.connect(
+                host=DB_HOST, port=DB_PORT, user=DB_USER, password=DB_PASSWORD, charset="utf8mb4", autocommit=True
+            )
+            with conn.cursor() as cur:
+                cur.execute(f"CREATE DATABASE IF NOT EXISTS `{DB_NAME}` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci")
+            conn.close()
+        except Exception:
+            DB_READY = False
+            return
+    conn = _db_connect(DB_NAME)
+    with conn.cursor() as cur:
+        cur.execute(
+            """
+            CREATE TABLE IF NOT EXISTS history_items (
+                id VARCHAR(64) PRIMARY KEY,
+                mode VARCHAR(32),
+                prompt TEXT,
+                source_image_url TEXT,
+                image_url TEXT,
+                size VARCHAR(16),
+                watermark TINYINT(1),
+                created_at DATETIME
+            )
+            """
+        )
+    DB_READY = True
+
+def _dt_mysql(ts: str | None) -> str:
+    if not ts:
+        return datetime.utcnow().isoformat().replace("T", " ")[:19]
+    return str(ts).replace("T", " ")[:19]
 
 # 历史记录存储配置
 HISTORY_DIR = os.path.join(app.root_path, 'data')
@@ -57,6 +114,39 @@ def _ensure_history_store():
 
 _ensure_history_store()
 
+_db_init()
+
+def _migrate_file_history_to_db():
+    if not DB_READY:
+        return
+    try:
+        items = _load_history()
+        if not items:
+            return
+        conn = _db_connect(DB_NAME)
+        with conn.cursor() as cur:
+            for it in items:
+                cur.execute(
+                    """
+                    INSERT IGNORE INTO history_items (id, mode, prompt, source_image_url, image_url, size, watermark, created_at)
+                    VALUES (%s,%s,%s,%s,%s,%s,%s,%s)
+                    """,
+                    (
+                        it.get("id"),
+                        it.get("mode"),
+                        it.get("prompt"),
+                        it.get("source_image_url"),
+                        it.get("image_url"),
+                        it.get("size"),
+                        1 if it.get("watermark") else 0,
+                        _dt_mysql(it.get("created_at")),
+                    ),
+                )
+    except Exception:
+        pass
+
+_migrate_file_history_to_db()
+
 def _load_history():
     try:
         with open(HISTORY_FILE, 'r', encoding='utf-8') as f:
@@ -72,8 +162,30 @@ def _save_history(items):
         pass
 
 def _add_history_entry(entry):
+    if DB_READY:
+        try:
+            conn = _db_connect(DB_NAME)
+            with conn.cursor() as cur:
+                cur.execute(
+                    """
+                    INSERT INTO history_items (id, mode, prompt, source_image_url, image_url, size, watermark, created_at)
+                    VALUES (%s,%s,%s,%s,%s,%s,%s,%s)
+                    """,
+                    (
+                        entry.get("id"),
+                        entry.get("mode"),
+                        entry.get("prompt"),
+                        entry.get("source_image_url"),
+                        entry.get("image_url"),
+                        entry.get("size"),
+                        1 if entry.get("watermark") else 0,
+                        _dt_mysql(entry.get("created_at")),
+                    ),
+                )
+            return entry
+        except Exception:
+            pass
     items = _load_history()
-    # 追加并限制长度
     items.append(entry)
     if len(items) > MAX_HISTORY:
         items = items[-MAX_HISTORY:]
@@ -81,6 +193,14 @@ def _add_history_entry(entry):
     return entry
 
 def _delete_history_entry(item_id):
+    if DB_READY:
+        try:
+            conn = _db_connect(DB_NAME)
+            with conn.cursor() as cur:
+                cur.execute("DELETE FROM history_items WHERE id=%s", (item_id,))
+            return True
+        except Exception:
+            pass
     items = _load_history()
     new_items = [item for item in items if item.get('id') != item_id]
     if len(new_items) != len(items):
@@ -278,8 +398,28 @@ def evaluate_photo():
 def history_list():
     try:
         limit = int(request.args.get('limit', '100'))
+        if DB_READY:
+            conn = _db_connect(DB_NAME)
+            with conn.cursor() as cur:
+                cur.execute(
+                    "SELECT id, mode, prompt, source_image_url, image_url, size, watermark, created_at FROM history_items ORDER BY created_at DESC LIMIT %s",
+                    (max(1, min(1000, limit)),),
+                )
+                rows = cur.fetchall()
+                items = []
+                for r in rows:
+                    items.append({
+                        'id': r[0],
+                        'mode': r[1],
+                        'prompt': r[2],
+                        'source_image_url': r[3],
+                        'image_url': r[4],
+                        'size': r[5],
+                        'watermark': bool(r[6]),
+                        'created_at': (r[7].strftime('%Y-%m-%d %H:%M:%S') if r[7] else datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S'))
+                    })
+            return jsonify({'success': True, 'items': items})
         items = _load_history()
-        # 按时间倒序
         items.sort(key=lambda x: x.get('created_at', ''), reverse=True)
         return jsonify({'success': True, 'items': items[:max(1, min(1000, limit))]})
     except Exception as e:
