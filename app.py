@@ -10,6 +10,7 @@ import json
 import uuid
 from datetime import datetime
 from werkzeug.utils import secure_filename
+from openai import OpenAI
 
 # 加载环境变量
 load_dotenv()
@@ -20,6 +21,11 @@ app = Flask(__name__)
 client = Ark(
     base_url="https://ark.cn-beijing.volces.com/api/v3",
     api_key=os.environ.get("ARK_API_KEY"),
+)
+
+ms_client = OpenAI(
+    base_url=os.environ.get("MS_BASE_URL"),
+    api_key=os.environ.get("MS_API_KEY"),
 )
 
 # 历史记录存储配置
@@ -73,6 +79,14 @@ def _add_history_entry(entry):
         items = items[-MAX_HISTORY:]
     _save_history(items)
     return entry
+
+def _delete_history_entry(item_id):
+    items = _load_history()
+    new_items = [item for item in items if item.get('id') != item_id]
+    if len(new_items) != len(items):
+        _save_history(new_items)
+        return True
+    return False
 
 
 def safe_generate_image(prompt, **kwargs):
@@ -155,6 +169,18 @@ def _encode_image_b64(img: Image.Image, fmt: str = 'JPEG') -> str:
     img.save(buf, format=fmt, quality=90)
     return base64.b64encode(buf.getvalue()).decode('ascii')
 
+def _image_file_to_data_url(file_storage) -> str:
+    img = Image.open(file_storage.stream)
+    if img.mode not in ('RGB', 'L'):
+        img = img.convert('RGB')
+    max_dim = 2048
+    w, h = img.size
+    if max(w, h) > max_dim:
+        img = img.copy()
+        img.thumbnail((max_dim, max_dim), Image.LANCZOS)
+    b64 = _encode_image_b64(img, fmt='JPEG')
+    return f"data:image/jpeg;base64,{b64}"
+
 
 @app.route('/')
 def index():
@@ -201,6 +227,52 @@ def serve_upload(filename):
     except Exception as e:
         return jsonify({'error': f'Error serving upload: {str(e)}'}), 500
 
+@app.route('/api/evaluate/photo', methods=['POST'])
+def evaluate_photo():
+    try:
+        image_url = None
+        if request.content_type and 'application/json' in request.content_type:
+            data = request.get_json() or {}
+            image_url = data.get('image_url')
+        elif 'file' in request.files:
+            image_url = _image_file_to_data_url(request.files['file'])
+        else:
+            return jsonify({'success': False, 'error': '请上传图片或提供image_url'}), 400
+
+        prompt_text = '请作为专业的摄影与图像审美评估助手，用中文列点评估这张照片的优点、缺点，并给出具体且可操作的改进建议。语言简洁，避免空话。'
+        resp = ms_client.chat.completions.create(
+            model='Qwen/Qwen3-VL-8B-Instruct',
+            messages=[{
+                'role': 'user',
+                'content': [
+                    {'type': 'text', 'text': prompt_text},
+                    {'type': 'image_url', 'image_url': {'url': image_url}},
+                ],
+            }],
+            stream=False,
+        )
+
+        text = ''
+        try:
+            text = (resp.choices[0].message.content or '').strip()
+        except Exception:
+            text = ''
+
+        if not text:
+            return jsonify({'success': False, 'error': 'AI未返回有效内容'}), 502
+
+        _add_history_entry({
+            'id': str(uuid.uuid4()),
+            'mode': 'evaluate',
+            'prompt': prompt_text,
+            'image_url': image_url if isinstance(image_url, str) and image_url.startswith('http') else '',
+            'created_at': datetime.utcnow().isoformat()
+        })
+
+        return jsonify({'success': True, 'evaluation': text})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
 # 查询历史记录
 @app.route('/api/history', methods=['GET'])
 def history_list():
@@ -210,6 +282,17 @@ def history_list():
         # 按时间倒序
         items.sort(key=lambda x: x.get('created_at', ''), reverse=True)
         return jsonify({'success': True, 'items': items[:max(1, min(1000, limit))]})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
+@app.route('/api/history/<item_id>', methods=['DELETE'])
+def delete_history_item(item_id):
+    try:
+        if _delete_history_entry(item_id):
+            return jsonify({'success': True})
+        else:
+            return jsonify({'success': False, 'error': 'Item not found'}), 404
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)}), 500
 

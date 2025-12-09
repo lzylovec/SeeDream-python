@@ -416,16 +416,49 @@
         }
 
         .thumb-item {
+            position: relative;
             background: var(--glass-bg);
             border: 1px solid var(--glass-border);
             border-radius: var(--radius-md);
             padding: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .delete-btn {
+            position: absolute;
+            top: 4px;
+            right: 4px;
+            width: 24px;
+            height: 24px;
+            background: rgba(255, 255, 255, 0.9);
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            opacity: 0;
+            transition: all 0.2s ease;
+            color: #ef4444;
+            font-size: 14px;
+            z-index: 2;
+        }
+
+        .thumb-item:hover .delete-btn {
+            opacity: 1;
+        }
+
+        .delete-btn:hover {
+            background: #ef4444;
+            color: white;
+            transform: scale(1.1);
         }
 
         .thumb-item img {
-            width: 100%;
-            height: 110px;
-            object-fit: cover;
+            max-width: 100%;
+            height: auto;
             border-radius: var(--radius-sm);
         }
 
@@ -646,7 +679,7 @@
             <div class="hero-inner">
                 <div class="hero-copy">
                     <h1 class="hero-title">影像魔方 · <span class="accent-gradient">AI修图</span></h1>
-                    <p class="hero-subtitle">一键文生图、图文生图、批量优选，轻松生成素材</p>
+                    <p class="hero-subtitle">一键文生图、AI修图、批量优选，轻松生成素材</p>
                     <button class="hero-cta" id="hero-cta" onclick="scrollToGenerator()">开始生成</button>
                 </div>
                 <div class="hero-visual">
@@ -665,15 +698,15 @@
             <div class="feature-cards">
                 <div class="feature-card"
                     onclick="document.querySelector('.tab:nth-child(1)').click(); document.querySelector('main').scrollIntoView({behavior:'smooth'});">
-                    <div class="feature-icon">📝</div>
-                    <div class="feature-title">文生图</div>
-                    <div class="feature-desc">输入描述，AI生成精美图片</div>
+                    <div class="feature-icon">🖼️</div>
+                    <div class="feature-title">AI 修图</div>
+                    <div class="feature-desc">参考图片+修图说明，一键优化</div>
                 </div>
                 <div class="feature-card"
                     onclick="document.querySelector('.tab:nth-child(2)').click(); document.querySelector('main').scrollIntoView({behavior:'smooth'});">
-                    <div class="feature-icon">🖼️</div>
-                    <div class="feature-title">图文生图</div>
-                    <div class="feature-desc">参考图片+描述，高质量生成</div>
+                    <div class="feature-icon">📝</div>
+                    <div class="feature-title">文生图</div>
+                    <div class="feature-desc">输入描述，AI生成精美图片</div>
                 </div>
                 <div class="feature-card"
                     onclick="document.querySelector('.tab:nth-child(3)').click(); document.querySelector('main').scrollIntoView({behavior:'smooth'});">
@@ -686,14 +719,16 @@
 
         <main>
             <div class="tabs">
-                <div class="tab active" onclick="switchTab('text-to-image')">文生图</div>
-                <div class="tab" onclick="switchTab('image-to-image')">图文生图</div>
+                <div class="tab active" onclick="switchTab('image-to-image')"><span class="accent-gradient">AI 修图</span>
+                </div>
+                <div class="tab" onclick="switchTab('text-to-image')">文生图</div>
                 <div class="tab" onclick="switchTab('bulk-select')">批量优选</div>
+                <div class="tab" onclick="switchTab('ai-evaluate')">AI评价</div>
                 <div class="tab" onclick="switchTab('history')">历史记录</div>
             </div>
 
             <!-- 文生图表单 -->
-            <div id="text-to-image" class="tab-content active">
+            <div id="text-to-image" class="tab-content">
                 <div class="form-group">
                     <label for="text-prompt">图片描述</label>
                     <textarea id="text-prompt" placeholder="请输入详细的图片描述..."></textarea>
@@ -717,11 +752,11 @@
                 <div id="text-result" class="result"></div>
             </div>
 
-            <!-- 图文生图表单 -->
-            <div id="image-to-image" class="tab-content">
+            <!-- AI 修图表单（原图文生图） -->
+            <div id="image-to-image" class="tab-content active">
                 <div class="form-group">
-                    <label for="image-prompt">图片描述</label>
-                    <textarea id="image-prompt" placeholder="请输入详细的图片描述..."></textarea>
+                    <label for="image-prompt">修图说明</label>
+                    <textarea id="image-prompt" placeholder="请输入详细的修图说明（可从AI评价缺点一键填充）..."></textarea>
                 </div>
                 <div class="form-group">
                     <label>参考图片（拖拽上传或点击选择）</label>
@@ -730,7 +765,8 @@
                         <div class="upload-text">拖拽图片到此处，或点击选择</div>
                         <div class="upload-hint">支持 JPG/PNG/WebP，上传后自动生成URL</div>
                     </div>
-                    <input type="file" id="ref-file" accept="image/*" style="display:none" onchange="handleRefFileSelect(event)">
+                    <input type="file" id="ref-file" accept="image/*" style="display:none"
+                        onchange="handleRefFileSelect(event)">
                     <div id="ref-preview" class="thumb-grid" style="grid-template-columns: repeat(1, 1fr);"></div>
                     <div id="ref-upload-result" class="result"></div>
                 </div>
@@ -751,7 +787,7 @@
                     </div>
                 </div>
                 <button id="image-button" onclick="generateImageToImage()">
-                    <span>生成图片</span>
+                    <span>开始修图</span>
                 </button>
 
                 <div id="image-result" class="result"></div>
@@ -774,6 +810,24 @@
                     <span>开始优选</span>
                 </button>
                 <div id="bulk-result" class="result"></div>
+            </div>
+
+            <!-- AI评价 -->
+            <div id="ai-evaluate" class="tab-content">
+                <div class="form-group">
+                    <label>上传照片进行AI评价</label>
+                    <div class="upload-area" id="eval-upload-area"
+                        onclick="document.getElementById('eval-file').click()">
+                        <div class="upload-icon">📷</div>
+                        <div class="upload-text">点击选择或拖拽照片到此处</div>
+                        <div class="upload-hint">支持 JPG/PNG/WebP</div>
+                    </div>
+                    <input type="file" id="eval-file" accept="image/*" style="display:none"
+                        onchange="handleEvalFileSelect(event)">
+                    <div id="eval-preview" class="thumb-grid" style="grid-template-columns: repeat(1, 1fr);"></div>
+                </div>
+                <button id="eval-button" onclick="startAiEvaluate()"><span>开始评价</span></button>
+                <div id="eval-result" class="result"></div>
             </div>
 
             <!-- 历史记录 -->
@@ -945,7 +999,7 @@
             if (firstTab) firstTab.click();
             const main = document.querySelector('main');
             if (main) main.scrollIntoView({ behavior: 'smooth' });
-            const prompt = document.getElementById('text-prompt');
+            const prompt = document.getElementById('image-prompt');
             if (prompt) prompt.focus();
         }
 
@@ -1220,10 +1274,13 @@
             const html = items.map(it => {
                 const title = (it.prompt || '').slice(0, 36);
                 const url = it.image_url || '';
-                const mode = it.mode === 'image_to_image' ? '图生图' : '文生图';
+                const mode = it.mode === 'image_to_image' ? 'AI 修图' : '文生图';
                 const time = (it.created_at || '').replace('T', ' ').slice(0, 19);
                 return `
-                    <div class="thumb-item" title="${mode} · ${time}">
+                    <div class="thumb-item" title="${mode} · ${time}" id="history-item-${it.id}">
+                        <div class="delete-btn" onclick="deleteHistoryItem('${it.id}', event)" title="删除记录">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                        </div>
                         <a href="${url}" target="_blank" rel="noopener noreferrer">
                             <img src="${url}" alt="历史生成图"/>
                         </a>
@@ -1236,6 +1293,31 @@
             } else {
                 grid.innerHTML = html;
             }
+        }
+
+        function deleteHistoryItem(id, event) {
+            if (event) event.stopPropagation();
+            if (!confirm('确定要删除这条记录吗？')) return;
+
+            fetch('/api/history/' + id, { method: 'DELETE' })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        const item = document.getElementById('history-item-' + id);
+                        if (item) {
+                            item.style.transition = 'all 0.2s ease';
+                            item.style.opacity = '0';
+                            item.style.transform = 'scale(0.9)';
+                            setTimeout(() => item.remove(), 200);
+                        }
+                    } else {
+                        alert('删除失败: ' + (data.error || '未知错误'));
+                    }
+                })
+                .catch(err => {
+                    console.error('删除请求失败:', err);
+                    alert('请求失败，请稍后重试');
+                });
         }
 
         // 监听窗口滚动，靠近底部自动加载更多
@@ -1416,6 +1498,133 @@
 
         // 初始化拖拽区域
         initRefUploadDnD();
+
+        // AI评价拖拽与上传
+        const evalState = { file: null };
+        function handleEvalFileSelect(e) {
+            const file = e.target.files && e.target.files[0];
+            if (!file) return;
+            evalState.file = file;
+            const reader = new FileReader();
+            reader.onload = (ev) => {
+                const preview = document.getElementById('eval-preview');
+                if (preview) {
+                    preview.innerHTML = `
+                        <div class="thumb-item">
+                            <img src="${ev.target.result}" alt="预览">
+                            <span class="thumb-name">${file.name}</span>
+                        </div>
+                    `;
+                }
+            };
+            reader.readAsDataURL(file);
+        }
+        function initEvalUploadDnD() {
+            const area = document.getElementById('eval-upload-area');
+            if (!area) return;
+            area.addEventListener('dragover', (ev) => { ev.preventDefault(); area.classList.add('dragover'); });
+            area.addEventListener('dragleave', () => area.classList.remove('dragover'));
+            area.addEventListener('drop', (ev) => {
+                ev.preventDefault();
+                area.classList.remove('dragover');
+                const files = ev.dataTransfer && ev.dataTransfer.files;
+                if (files && files.length) {
+                    const dtf = new DataTransfer();
+                    dtf.items.add(files[0]);
+                    const input = document.getElementById('eval-file');
+                    if (input) input.files = dtf.files;
+                    handleEvalFileSelect({ target: { files } });
+                }
+            });
+        }
+        function startAiEvaluate() {
+            const button = document.getElementById('eval-button');
+            const original = button.innerHTML;
+            const resultEl = document.getElementById('eval-result');
+            if (!evalState.file) { showResult('eval-result', '请先选择一张照片', 'error'); if (typeof playWarningAnimation === 'function') playWarningAnimation(); return; }
+            if (typeof stopCharacterAnimation === 'function') stopCharacterAnimation();
+            if (typeof playCharacterAnimation === 'function') playCharacterAnimation();
+            button.disabled = true;
+            button.innerHTML = '<div class="loading"></div> <span>评价中...</span>';
+            showResult('eval-result', '正在进行AI评价，请稍候...', 'info');
+            const formData = new FormData();
+            formData.append('file', evalState.file);
+            fetch('/api/evaluate/photo', { method: 'POST', body: formData })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        const raw = (data.evaluation || '');
+                        const defects = parseDefectsFromEvaluation(raw);
+                        const text = raw.replace(/\n/g, '<br>');
+                        window.__aiEval__ = { defects, raw, file: evalState.file };
+                        const editBtn = `<button style="margin-top:0.6rem" onclick="applyDefectsToEditor()"><span>根据缺点一键跳转到 AI 修图</span></button>`;
+                        resultEl.innerHTML = `<div class="message success">评价完成</div><div class="message" style="text-align:left">${text}</div>${editBtn}`;
+                    } else {
+                        showResult('eval-result', data.error || '评价失败', 'error');
+                    }
+                })
+                .catch(err => { showResult('eval-result', '请求失败: ' + err.message, 'error'); })
+                .finally(() => {
+                    if (typeof stopCharacterAnimation === 'function') { try { stopCharacterAnimation(); } catch (_) { } }
+                    if (typeof resetIdleTimer === 'function') { try { resetIdleTimer(); } catch (_) { } }
+                    button.disabled = false;
+                    button.innerHTML = original;
+                });
+        }
+        initEvalUploadDnD();
+
+        // 更稳健地从AI评价内容中提取“缺点”段落
+        function parseDefectsFromEvaluation(text) {
+            if (!text) return '';
+            let t = String(text).replace(/\r\n?|\u2028|\u2029/g, '\n');
+            // 允许前缀符号，如❌✘等
+            const startIdx = t.search(/[❌✘\-\*\s]*缺点\s*[：:]/);
+            let seg = '';
+            if (startIdx >= 0) {
+                let right = t.slice(startIdx);
+                right = right.replace(/^[^\n]*\n?/, '');
+                const endIdx = right.search(/(可操作的)?(改进)?建议\s*[：:]/);
+                seg = endIdx >= 0 ? right.slice(0, endIdx) : right;
+            }
+            // 回退：抓取以 -/•/编号 开头的若干行
+            if (!seg.trim()) {
+                const lines = t.split('\n').filter(l => /^\s*([-•]|\d+\.)/.test(l));
+                seg = lines.join('\n');
+            }
+            if (!seg.trim()) seg = t;
+            // 清理markdown粗体星号
+            seg = seg.replace(/\*{1,3}/g, '').replace(/^[\s\u200b]+|[\s\u200b]+$/g, '');
+            return seg.trim();
+        }
+
+        // 将缺点填充到 AI 修图模块，并把评价图片作为参考图
+        function applyDefectsToEditor() {
+            const defects = (window.__aiEval__ && window.__aiEval__.defects) || '';
+            const promptInput = document.getElementById('image-prompt');
+            const sizeInput = document.getElementById('image-size');
+            // 构造修图说明
+            const editPrompt = buildEditPrompt(defects);
+            if (promptInput) promptInput.value = editPrompt;
+            // 上传评价图片作为参考图，并自动填充URL和预览
+            const file = (window.__aiEval__ && window.__aiEval__.file) || (evalState && evalState.file);
+            if (file) {
+                uploadRefFile(file); // 复用已有函数
+            }
+            // 跳转到 AI 修图标签
+            const tab = Array.from(document.querySelectorAll('.tab')).find(el => el.textContent.includes('AI 修图'));
+            if (tab) tab.click();
+            const main = document.querySelector('main');
+            if (main) main.scrollIntoView({ behavior: 'smooth' });
+            if (promptInput) promptInput.focus();
+        }
+
+        function buildEditPrompt(defects) {
+            const base = '请根据以下图像缺点进行有针对性的修图：';
+            const tips = '尽量保持真实质感，避免过度磨皮或失真；优先进行光影、材质、细节与构图微调。';
+            const cleaned = (defects || '').replace(/\*{1,3}/g, '').replace(/\n{3,}/g, '\n\n').trim();
+            const content = cleaned || '';
+            return `${base}\n${content}\n${tips}`.trim();
+        }
     </script>
 
     <script>
@@ -1438,11 +1647,12 @@
                 // 根据视频比例自适应高度（限制在 200-380）
                 const ratio = (natW > 0 && natH > 0) ? (natH / natW) : (9 / 16);
                 const targetH = Math.max(200, Math.min(380, Math.round(stageW * ratio)));
-                stage.style.height = targetH + 'px';
-                canvas.width = stageW;
-                canvas.height = targetH;
-                offscreen.width = canvas.width;
-                offscreen.height = canvas.height;
+                // 确保画布尺寸与当前视频匹配
+                if (canvas.width !== stageW) canvas.width = stageW;
+                if (canvas.height !== targetH) canvas.height = targetH;
+
+                if (offscreen.width !== canvas.width) offscreen.width = canvas.width;
+                if (offscreen.height !== canvas.height) offscreen.height = canvas.height;
             }
 
             window.addEventListener('resize', resizeStage);
@@ -1798,17 +2008,21 @@
                 const ratio = videoH / videoW;
                 const targetH = Math.max(200, Math.min(380, Math.round(stageW * ratio)));
 
-                stage.style.height = targetH + 'px';
-                canvas.width = stageW;
-                canvas.height = targetH;
-                offscreen.width = canvas.width;
-                offscreen.height = canvas.height;
+                if (stage.style.height !== targetH + 'px') stage.style.height = targetH + 'px';
+
+                // 仅在尺寸变化时更新画布，避免清空当前内容
+                if (canvas.width !== stageW) canvas.width = stageW;
+                if (canvas.height !== targetH) canvas.height = targetH;
+
+                if (offscreen.width !== canvas.width) offscreen.width = canvas.width;
+                if (offscreen.height !== canvas.height) offscreen.height = canvas.height;
 
                 console.log(`角色动作画布尺寸已更新: ${canvas.width}x${canvas.height}, 视频比例: ${ratio.toFixed(3)}`);
             }
 
             // 用户活动事件列表
-            const userEvents = ['mousedown', 'mousemove', 'keydown', 'scroll', 'touchstart', 'click'];
+            // const userEvents = ['mousedown', 'keydown', 'scroll', 'touchstart', 'click'];
+            const userEvents = []; // 清空事件列表，让视频保持常驻播放，不受用户操作打断
 
             // 重置空闲计时器
             function resetIdleTimer() {
@@ -1861,6 +2075,9 @@
                 // 更新画布尺寸以匹配当前视频
                 updateActionCanvasSize();
 
+                // 确保尺寸调整没有清空画布（如果尺寸没变）
+                // 如果尺寸变了，画布会被清空，这是不可避免的，但我们可以尝试尽快绘制第一帧
+
                 // 设置视频不循环，播放完后自动选择下一个
                 currentActionVideo.loop = false;
                 currentActionVideo.currentTime = 0;
@@ -1894,10 +2111,10 @@
                                                 if (isIdle) {
                                                     startRandomActionVideo();
                                                 }
-                                            }, 1000);
+                                            }, 100);
                                         });
                                     }
-                                }, 500);
+                                }, 100);
                             } else {
                                 isPlayingAction = false;
                                 // 其他错误，尝试播放下一个视频
@@ -1905,7 +2122,7 @@
                                     if (isIdle) {
                                         startRandomActionVideo();
                                     }
-                                }, 1000);
+                                }, 100);
                             }
                         });
                     }
@@ -1932,9 +2149,7 @@
 
                 // 如果仍然空闲，继续播放下一个随机视频
                 if (isIdle) {
-                    setTimeout(() => {
-                        startRandomActionVideo();
-                    }, 1000); // 1秒间隔后播放下一个
+                    startRandomActionVideo();
                 }
             }
 
@@ -1955,10 +2170,10 @@
 
                 isPlayingAction = false;
 
-                // 清空画布
-                if (ctx && canvas) {
-                    ctx.clearRect(0, 0, canvas.width, canvas.height);
-                }
+                // 移除清空画布的操作，保留最后一帧，避免闪烁或白屏
+                // if (ctx && canvas) {
+                //     ctx.clearRect(0, 0, canvas.width, canvas.height);
+                // }
             }
 
             // 渲染灵动视频帧
